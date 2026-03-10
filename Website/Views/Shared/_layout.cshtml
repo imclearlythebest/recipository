@@ -1,10 +1,88 @@
+@{
+    ViewData["SiteName"] = "Recipository";
+}
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>@ViewData["Title"] - Recipository</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <link rel="stylesheet" href="/css/pico.classless.sand.min.css">
     <link rel="stylesheet" href="/css/styles.css">
+    @RenderSection("Styles", required: false)
+    <title>@ViewData["Title"]</title>
 </head>
+
 <body>
-    @RenderBody()
+    <header class="container">
+        <nav>
+            <ul>
+                <li>
+                    <strong>
+                     <a asp-controller="Home" asp-action="Index">
+                        @ViewData["SiteName"]
+                     </a>
+                    </strong>
+                </li>
+            </ul>
+            <ul>
+                @RenderSection("NavLinks", required: false)
+                <li>Shop</li>
+                <li>Settings</li>
+                <li>
+                    <button id="theme-toggle" class="secondary outline theme-toggle" type="button" aria-label="Toggle dark theme">Dark mode</button>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        @RenderBody()
+    </main>
+
+    <footer class="container">
+        <hr>
+        <nav aria-label="Footer">
+            <ul>
+                <li><a asp-controller="Home" asp-action="About">About</a></li>
+                <li><a asp-controller="Home" asp-action="Contact">Contact</a></li>
+                <li><a asp-controller="Home" asp-action="Privacy">Privacy</a></li>
+            </ul>
+        </nav>
+        <small>© 2026 @ViewData["SiteName"]. All rights reserved.</small>
+    </footer>
+
+    <script>
+        (function () {
+            var root = document.documentElement;
+            var toggle = document.getElementById('theme-toggle');
+            var key = '@(ViewData["ThemeKey"] ?? "site")-theme';
+
+            function setTheme(theme) {
+                root.setAttribute('data-theme', theme);
+                toggle.textContent = theme === 'dark' ? 'Light mode' : 'Dark mode';
+            }
+
+            var saved = localStorage.getItem(key);
+            if (saved === 'light' || saved === 'dark') {
+                setTheme(saved);
+            } else {
+                var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                setTheme(systemDark ? 'dark' : 'light');
+            }
+
+            toggle.addEventListener('click', function () {
+                var current = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+                var next = current === 'dark' ? 'light' : 'dark';
+                setTheme(next);
+                localStorage.setItem(key, next);
+            });
+        })();
+    </script>
+
+    @RenderSection("Scripts", required: false)
 </body>
+
 </html>
