@@ -24,15 +24,33 @@
         </ul>
         <ul>
           @RenderSection("NavLinks", required: false)
+          @if (true) {
+            <li><a href="#">Login</a></li>
+            <li><a href="#">Sign Up</a></li>
+          }
         </ul>
       </nav>
     </header>
 
     <div class="middle container">
       <aside>
+        <nav>
+          <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Marketplace</a></li>
+            <li><a href="#">Cart</a></li>
+            <li><a href="#">Orders</a></li>
+            @if (true)
+            {
+              <partial name="_AdminLinks" />
+            }
+          </ul>
+        </nav>
         <partial name="_LeftSidebar" />
       </aside>
       <main class="container">
+        <input type="search" name="search" placeholder="Search" aria-label="Search" />
+        <hr>
         @RenderBody()
       </main>
       <aside>
