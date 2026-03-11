@@ -1,88 +1,57 @@
-@{
-    ViewData["SiteName"] = "Recipository";
-}
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="color-scheme" content="light dark">
-    <link rel="stylesheet" href="/css/pico.sand.min.css">
-    <link rel="stylesheet" href="/css/styles.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/pico.sand.min.css">
+  <link rel="stylesheet" href="/css/style.css" asp-append-version="true">
     @RenderSection("Styles", required: false)
     <title>@ViewData["Title"]</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <header class="container">
-        <nav>
-            <ul>
-                <li>
-                    <strong>
-                     <a asp-controller="Home" asp-action="Index">
-                        @ViewData["SiteName"]
-                     </a>
-                    </strong>
-                </li>
-            </ul>
-            <ul>
-                @RenderSection("NavLinks", required: false)
-                <li>Shop</li>
-                <li>Settings</li>
-                <li>
-                    <button id="theme-toggle" class="secondary outline theme-toggle" type="button" aria-label="Toggle dark theme">Dark mode</button>
-                </li>
-            </ul>
-        </nav>
+      <nav>
+        <ul>
+          <li><strong>
+            <a asp-controller="Home" asp-action="Index" style="text-decoration: none;">
+              <span class="fas fa-utensils"></span> Recipository
+            </a>
+          </strong></li>
+        </ul>
+        <ul>
+          @RenderSection("NavLinks", required: false)
+        </ul>
+      </nav>
     </header>
 
-    <main class="container">
+    <div class="middle container">
+      <aside>
+        <partial name="_LeftSidebar" />
+      </aside>
+      <main class="container">
         @RenderBody()
-    </main>
+      </main>
+      <aside>
+        <partial name="_RightSidebar" />
+      </aside>
+    </div>
 
     <footer class="container">
-        <hr>
-        <nav aria-label="Footer">
-            <ul>
-                <li><a asp-controller="Home" asp-action="About">About</a></li>
-                <li><a asp-controller="Home" asp-action="Contact">Contact</a></li>
-                <li><a asp-controller="Home" asp-action="Privacy">Privacy</a></li>
-            </ul>
-        </nav>
-        <small>© 2026 @ViewData["SiteName"]. All rights reserved.</small>
+      <nav aria-label="Footer">
+        <ul>
+          <li><a asp-controller="Home" asp-action="About">About</a></li>
+          <li><a asp-controller="Home" asp-action="Contact">Contact</a></li>
+          <li><a asp-controller="Home" asp-action="Privacy">Privacy</a></li>
+        </ul>
+      </nav>
+      <small>© 2026 Recipository. All rights reserved.</small>
     </footer>
-
-    <script>
-        (function () {
-            var root = document.documentElement;
-            var toggle = document.getElementById('theme-toggle');
-            var key = '@(ViewData["ThemeKey"] ?? "site")-theme';
-
-            function setTheme(theme) {
-                root.setAttribute('data-theme', theme);
-                toggle.textContent = theme === 'dark' ? 'Light mode' : 'Dark mode';
-            }
-
-            var saved = localStorage.getItem(key);
-            if (saved === 'light' || saved === 'dark') {
-                setTheme(saved);
-            } else {
-                var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                setTheme(systemDark ? 'dark' : 'light');
-            }
-
-            toggle.addEventListener('click', function () {
-                var current = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-                var next = current === 'dark' ? 'light' : 'dark';
-                setTheme(next);
-                localStorage.setItem(key, next);
-            });
-        })();
-    </script>
-
+    <script src="/js/script.js"></script>
     @RenderSection("Scripts", required: false)
-</body>
+  </body>
 
 </html>
