@@ -1,0 +1,12 @@
+@model List<Ingredient>
+<div class = "grid">
+  @foreach (var ingredient in Model)
+  {
+  <article>
+    <h2>@ingredient.Name</h2>
+    <img src="@ingredient.ImageUrl" alt="@ingredient.Name" max-width="100%"S />
+    <p>@ingredient.Description</p>
+    <p>Calories: @ingredient.Calories</p>
+  </article>
+  }
+</div>
