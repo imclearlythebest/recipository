@@ -4,6 +4,10 @@ public static class Routes
     public static void MapAppRoutes(this WebApplication app)
     {
         app.MapControllerRoute(
+            name: "ingredient",
+            pattern: "Ingredients/{action=Index}/{id?}",
+            defaults: new { controller = "Ingredient" });
+        app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}");
     }
