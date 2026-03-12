@@ -25,10 +25,12 @@
         </ul>
         <ul>
           @RenderSection("NavLinks", required: false)
-          @if (true) {
+          @if (true)
+          {
             <li><a href="#">Login</a></li>
             <li><a href="#">Sign Up</a></li>
           }
+          <li><a id="theme-toggle"><span class=""></span></a></li>
         </ul>
       </nav>
     </header>
