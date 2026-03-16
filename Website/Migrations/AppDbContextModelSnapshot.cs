@@ -17,6 +17,49 @@ namespace Website.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.4");
 
+            modelBuilder.Entity("Website.Models.Collection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Collections");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "A collection of ingredients",
+                            ImageUrl = "/images/tomato.jpg",
+                            Name = "My Collection"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Another collection of ingredients",
+                            ImageUrl = "/images/onion.jpg",
+                            Name = "Another Collection"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Yet another collection of ingredients",
+                            ImageUrl = "/images/garlic.jpg",
+                            Name = "Yet Another Collection"
+                        });
+                });
+
             modelBuilder.Entity("Website.Models.Content", b =>
                 {
                     b.Property<int>("Id")
@@ -64,6 +107,9 @@ namespace Website.Migrations
                     b.Property<float>("Calories")
                         .HasColumnType("REAL");
 
+                    b.Property<int?>("CollectionId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
@@ -74,6 +120,8 @@ namespace Website.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CollectionId");
 
                     b.ToTable("Ingredients");
 
@@ -102,6 +150,18 @@ namespace Website.Migrations
                             ImageUrl = "/images/garlic.jpg",
                             Name = "Garlic"
                         });
+                });
+
+            modelBuilder.Entity("Website.Models.Ingredient", b =>
+                {
+                    b.HasOne("Website.Models.Collection", null)
+                        .WithMany("Ingredients")
+                        .HasForeignKey("CollectionId");
+                });
+
+            modelBuilder.Entity("Website.Models.Collection", b =>
+                {
+                    b.Navigation("Ingredients");
                 });
 #pragma warning restore 612, 618
         }

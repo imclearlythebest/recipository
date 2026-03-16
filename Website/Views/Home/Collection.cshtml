@@ -1,0 +1,11 @@
+@model List<Collection>
+<div class = "grid">
+  @foreach (var collection in Model)
+  {
+  <article>
+    <h2>@collection.Name</h2>
+    <img src="@collection.ImageUrl" alt="@collection.Name" max-width="100%" />
+    <p>@collection.Description</p>
+  </article>
+  }
+</div>

@@ -6,6 +6,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<Ingredient> Ingredients => Set<Ingredient>();
     public DbSet<Content> Contents => Set<Content>();
+    public DbSet<Collection> Collections => Set<Collection>();
 
     // Seed data
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -19,6 +20,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         new Content { Id = 1, MainText = "This is some content.", CreatedAt = new DateTime(2024, 6, 1) },
         new Content { Id = 2, MainText = "This is some more content.", CreatedAt = new DateTime(2024, 6, 2) },
         new Content { Id = 3, MainText = "This is even more content.", CreatedAt = new DateTime(2024, 6, 3) }
+    );
+    modelBuilder.Entity<Collection>().HasData(
+        new Collection { Id = 1, Name = "My Collection", Description = "A collection of ingredients", ImageUrl = "/images/tomato.jpg" },
+        new Collection { Id = 2, Name = "Another Collection", Description = "Another collection of ingredients", ImageUrl = "/images/onion.jpg" },
+        new Collection { Id = 3, Name = "Yet Another Collection", Description = "Yet another collection of ingredients", ImageUrl = "/images/garlic.jpg" }
     );
     }
 }

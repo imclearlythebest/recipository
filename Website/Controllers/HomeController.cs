@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using Microsoft.AspNetCore.Mvc;
 using Website.Data;
 
@@ -12,6 +13,12 @@ public class HomeController(AppDbContext dbContext) : Controller
         return View(contents);
 
     }
+    public IActionResult Collection()
+    {
+        var collections = _dbContext.Collections.ToList();
+        return View(collections);
+    }
+
     public IActionResult About() => View();
     public IActionResult Contact() => View();
     public IActionResult Privacy() => View();
