@@ -2,4 +2,9 @@
     ViewData["Title"] = "Home";
 }
 
-<h1>@ViewData["Title"]</h1>
+@model List<Content>
+
+@foreach (var Post in Model)
+{   
+    <partial name='_Post.cshtml' model='Post' />
+}
