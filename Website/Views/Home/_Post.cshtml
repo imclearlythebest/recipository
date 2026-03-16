@@ -1,0 +1,12 @@
+@model Content
+<article>
+    <p>@Model.MainText</p>
+    <time datetime="@Model.CreatedAt">@Model.CreatedAt</time>
+    <footer>
+        <div role="group">
+            <button><span class="fas fa-arrow-up" /></button>
+            <button><span class="fas fa-arrow-down" /></button>
+            <button><span class="fas fa-comment" /></button>
+        </div>
+    </footer>
+</article>
