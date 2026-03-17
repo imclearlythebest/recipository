@@ -3,6 +3,7 @@ body > header {
     top: 0;
     background-color: var(--pico-background-color);
     border-bottom: 1px solid var(--pico-muted-border-color);
+    z-index: 1000;
 }
 
 body > footer {
