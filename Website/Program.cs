@@ -22,11 +22,12 @@ else
     app.UseHsts();
 }
 
-// Ensure db exists and apply migrations
+// Delete and recreate the database on startup (for development purposes)
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    db.Database.EnsureDeleted();
+    db.Database.EnsureCreated();
 }
 
 app.UseHttpsRedirection();
