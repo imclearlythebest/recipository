@@ -16,6 +16,12 @@ body > footer {
     min-height: 100vh;
 }
 
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: rem;
+}
+
 .middle > aside {
     position: sticky;
     top: var(--header-height);
@@ -27,4 +33,11 @@ body > footer {
     padding: 2rem;
     border-left: 1px solid var(--pico-muted-border-color);
     border-right: 1px solid var(--pico-muted-border-color);
+}
+
+.card-img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 0.5rem;
 }
