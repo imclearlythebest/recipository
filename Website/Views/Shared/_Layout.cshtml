@@ -17,18 +17,27 @@
     <header class="container">
       <nav>
         <ul>
-          <li><strong>
-            <a asp-controller="Home" asp-action="Index" style="text-decoration: none;">
-              <span class="fas fa-utensils"></span> Recipository
-            </a>
-          </strong></li>
+          <li>
+            <strong>
+              <a asp-controller="Home" asp-action="Index" style="text-decoration: none;">
+                <span class="fas fa-utensils"></span> Recipository
+              </a>
+            </strong>
+          </li>
+          <li>
+            <input type="search" name="search" placeholder="Search" aria-label="Search" />
+          </li>
         </ul>
         <ul>
           @RenderSection("NavLinks", required: false)
-          @if (true)
+          @if (User.Identity?.IsAuthenticated == true)
           {
-            <li><a href="#">Login</a></li>
-            <li><a href="#">Sign Up</a></li>
+            <partial name="_AvatarMenu" />
+          }
+          else
+          {
+            <li><a asp-controller="Auth" asp-action="Login">Login</a></li>
+            <li><a asp-controller="Auth" asp-action="Register">Register</a></li>
           }
           <li><a id="theme-toggle"><span class=""></span></a></li>
         </ul>
@@ -39,11 +48,11 @@
       <aside>
         <nav>
           <ul>
-            <li><a href="#">Home</a></li>
+            <li><a asp-controller="Home" asp-action="Index">Home</a></li>
             <li><a href="#">Marketplace</a></li>
             <li><a href="#">Cart</a></li>
             <li><a href="#">Orders</a></li>
-            @if (true)
+            @if (User.IsInRole("Admin"))
             {
               <partial name="_AdminLinks" />
             }
@@ -52,8 +61,6 @@
         <partial name="_LeftSidebar" />
       </aside>
       <main class="container">
-        <input type="search" name="search" placeholder="Search" aria-label="Search" />
-        <hr>
         @RenderBody()
       </main>
       <aside>
