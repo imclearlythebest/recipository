@@ -21,18 +21,16 @@
 
                 <p><small>@item.Description</small></p>
                 
-                <footer>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>$@item.Price.ToString("F2")</span>
-                        
-                        <form asp-controller="Cart" asp-action="AddToCart" method="post" style="margin-bottom: 0;">
-                            <input type="hidden" name="id" value="@item.Id" />
-                            <input type="hidden" name="quantity" value="1" />
-                            <button type="submit" class="outline" style="padding: 5px 10px; font-size: 0.8rem;">
-                                <i class="fas fa-cart-plus"></i> Add
-                            </button>
-                        </form>
-                    </div>
+                <footer style="display: flex; justify-content: space-between; align-items: center;">
+                <span>$@item.Price.ToString("F2")</span>
+                
+                <button 
+                    hx-post="/Cart/AddToCart/@item.Id" 
+                    hx-swap="none"
+                    class="outline" 
+                    style="padding: 5px 10px; font-size: 0.8rem;">
+                    <i class="fas fa-cart-plus"></i> Add
+                </button>
                 </footer>
             </article>
         }
