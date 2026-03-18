@@ -1,27 +1,26 @@
 @model IEnumerable<Website.Models.ShopItem>
 
-<div class="container">
-    <h1 class="my-4">Marketplace</h1>
-    <div class="row">
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Recipe Marketplace</h1>
+    
+    <div class="marketplace-grid">
         @foreach (var item in Model)
         {
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <img src="~/images/@item.Ingredient.ImageUrl" class="card-img-top" alt="@item.Ingredient.Name">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">@item.Ingredient.Name</h5>
-                        <p class="text-muted">@item.Ingredient.Description</p>
-                        <p class="fw-bold">$@item.Price</p>
-                        
-                        <form asp-action="AddToCart" method="post">
-                            <input type="hidden" name="shopItemId" value="@item.Id" />
-                            <div class="input-group mb-3">
-                                <span class="input-group-text">Qty</span>
-                                <input type="number" name="quantity" value="1" min="1" class="form-control">
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100">Add to Cart</button>
-                        </form>
-                    </div>
+            <div class="card item-card">
+                <img src="~/images/@item.ImageUrl" class="card-img-top" alt="@item.Name">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">@item.Name</h5>
+                    <p class="card-text text-muted">@item.Description</p>
+                    <p class="fw-bold mt-auto text-success">$@item.Price.ToString("F2")</p>
+                    
+                    <form asp-action="AddToCart" method="post">
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <div class="mb-3">
+                            <label class="form-label small">Quantity:</label>
+                            <input type="number" name="quantity" value="@item.Moq" min="@item.Moq" step="@item.Increment" class="form-control form-control-sm" />
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Add to Cart</button>
+                    </form>
                 </div>
             </div>
         }
@@ -29,6 +28,28 @@
 </div>
 
 <style>
-    body { overflow-y: scroll; }
-    .card-img-top { height: 200px; object-fit: cover; }
+    .marketplace-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+        padding-bottom: 50px;
+    }
+
+    .item-card {
+        transition: transform 0.2s;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .item-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    }
+
+    .card-img-top {
+        height: 200px;
+        object-fit: cover;
+        border-top-left-radius: calc(0.25rem - 1px);
+        border-top-right-radius: calc(0.25rem - 1px);
+    }
 </style>
