@@ -49,7 +49,7 @@
         <nav>
           <ul>
             <li><a asp-controller="Home" asp-action="Index">Home</a></li>
-            <li><a href="#">Marketplace</a></li>
+            <li><a asp-controller="Marketplace" asp-action="Index">Marketplace</a></li>
             <li><a href="#">Cart</a></li>
             <li><a href="#">Orders</a></li>
             @if (User.IsInRole("Admin"))
