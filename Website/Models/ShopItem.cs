@@ -1,10 +1,26 @@
 namespace Website.Models;
 
-public class ShopItem
+public class ShopItem : Ingredient
 {
-  public int Id { get; set; } // Entity Framework will handle this ID
-  public string Name { get; set; } = string.Empty;
-  public string? Description { get; set; }
-  public float Price { get; set; }
-  public string? ImageUrl { get; set; }
+    public float Price { get; set; }
+    public int Stock { get; set; }
+    public int Moq { get; set; }
+    public int Increment { get; set; }
+
+    public ShopItem() : base()
+    {
+        Price = 0.00f;
+        Stock = 0;
+        Moq = 0;
+        Increment = 0;
+    }
+
+    public ShopItem(string name, string description, string imageUrl, float calories, float price, int stock, int moq, int increment) 
+        : base(name, description, imageUrl, calories)
+    {
+        this.Price = price;
+        this.Stock = stock;
+        this.Moq = moq;
+        this.Increment = increment;
+    }
 }

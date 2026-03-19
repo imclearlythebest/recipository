@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Website.Data;
+using Website.Models;
 
 namespace Website.Controllers;
 
@@ -12,8 +13,8 @@ public class MarketplaceController : Controller
 
   public async Task<IActionResult> Index()
   {
-    // Change .Ingredients to .Contents
-  var items = await _context.Ingredients.ToListAsync(); 
-  return View(items);
+    // OfType<ShopItem> filters the Ingredients table for only ShopItems
+    var items = await _context.Ingredients.OfType<ShopItem>().ToListAsync();
+    return View(items);
   }
 }
