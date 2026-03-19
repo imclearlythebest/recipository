@@ -24,7 +24,10 @@
           <li><a asp-controller="Home" asp-action="Index">Home</a></li>
           <li><a asp-controller="Marketplace" asp-action="Index">Marketplace</a></li>
           <li><a asp-controller="Cart" asp-action="Index">Cart</a></li>
-          <li><a href="#">Orders</a></li>
+          
+          @* Feature 4: Functional Orders Link *@
+          <li><a asp-controller="Order" asp-action="Index">Orders</a></li>
+
           @if (User.IsInRole("Admin"))
           {
             <partial name="_AdminLinks" />
@@ -33,9 +36,11 @@
       </nav>
       <partial name="_LeftSidebar" />
     </aside>
+    
     <main class="container">
       @RenderBody()
     </main>
+
     @RenderSection("RightSidebar", required: false)
   </div>
 
