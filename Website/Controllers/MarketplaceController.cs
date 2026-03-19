@@ -1,31 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Website.Data;
 using Website.Models;
 
-namespace Website.Controllers
+namespace Website.Controllers;
+
+public class MarketplaceController : Controller
 {
-    public class MarketplaceController : Controller
-    {
+  private readonly AppDbContext _context;
 
-        public IActionResult Index()
-        {
+  public MarketplaceController(AppDbContext context) => _context = context;
 
-            var marketplaceItems = new List<ShopItem>
-            {
-                new ShopItem("Organic Avocado", "Ripe and ready for toast", "avocado.jpg", 160f, 2.50f, 50, 1, 1),
-                new ShopItem("Sea Salt", "Fine grain Mediterranean salt", "salt.jpg", 0f, 1.20f, 100, 1, 1),
-                new ShopItem("Extra Virgin Olive Oil", "Cold pressed 500ml", "oil.jpg", 120f, 15.00f, 20, 1, 1)
-            };
-
-            return View(marketplaceItems);
-        }
-
-        [HttpPost]
-        public IActionResult AddToCart(int id, int quantity)
-        {
-
-            System.Diagnostics.Debug.WriteLine($"Added item {id} with quantity {quantity}");
-            
-            return RedirectToAction("Index"); 
-        }
-    }
+  public async Task<IActionResult> Index()
+  {
+    // OfType<ShopItem> filters the Ingredients table for only ShopItems
+    var items = await _context.Ingredients.OfType<ShopItem>().ToListAsync();
+    return View(items);
+  }
 }

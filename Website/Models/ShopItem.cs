@@ -9,7 +9,7 @@ public class ShopItem : Ingredient
 
     public ShopItem() : base()
     {
-        Price = 0;
+        Price = 0.00f;
         Stock = 0;
         Moq = 0;
         Increment = 0;

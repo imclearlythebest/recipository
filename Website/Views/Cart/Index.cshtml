@@ -1,45 +1,73 @@
 @model IEnumerable<Website.Models.CartItem>
 
-<main class="container">
-  <article>
-    <header>
-      <h1>Shopping Cart</h1>
-    </header>
+<main class="container" id="cart-container">
+    <hgroup>
+        <h1>Your Shopping Cart</h1>
+        <p>Review your items before checking out</p>
+    </hgroup>
 
-    @if (!Model.Any()) {
-      <p>Your cart is empty. <a asp-controller="Marketplace" asp-action="Index">Go shopping?</a></p>
-    } else {
-      <table class="striped">
-        <thead>
-          <tr>
-            <th>Ingredient</th>
-            <th>Price</th>
-            <th>Qty</th>
-            <th>Subtotal</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          @foreach (var item in Model) {
-            <tr id="cart-row-@item.ShopItemId">
-              <td>@item.Product?.Name</td>
-              <td>$@item.Product?.Price.ToString("F2")</td>
-              <td>@item.Quantity</td>
-              <td>$@item.Subtotal.ToString("F2")</td>
-              <td>
-                <button 
-                  hx-post="/Cart/Remove/@item.ShopItemId" 
-                  hx-target="#cart-row-@item.ShopItemId" 
-                  hx-swap="outerHTML"
-                  class="outline secondary"
-                  style="padding: 2px 8px;">
-                  Remove
-                </button>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+    @if (Model == null || !Model.Any())
+    {
+        <article>
+            <p>Your cart is empty. <a href="/Marketplace">Return to Marketplace</a> to add some ingredients!</p>
+        </article>
     }
-  </article>
-</main>
+    else
+    {
+        <table role="grid">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th style="text-align:center;">Quantity</th>
+                    <th>Subtotal</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><strong>@item.Product.Name</strong></td>
+                        <td>$@item.Product.Price.ToString("F2")</td>
+                        <td>
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+                                <button class="outline secondary" 
+                                        style="padding: 2px 12px; margin: 0;"
+                                        hx-post="/Cart/UpdateQuantity?id=@item.ShopItemId&change=-1"
+                                        hx-target="#cart-container"
+                                        hx-select="#cart-container"> - </button>
+                                
+                                <span style="font-size: 1.1rem; font-weight: bold; min-width: 20px; text-align: center;">
+                                    @item.Quantity
+                                </span>
+                                
+                                <button class="outline secondary" 
+                                        style="padding: 2px 10px; margin: 0;"
+                                        hx-post="/Cart/UpdateQuantity?id=@item.ShopItemId&change=1"
+                                        hx-target="#cart-container"
+                                        hx-select="#cart-container"> + </button>
+                            </div>
+                        </td>
+                        <td>$@((item.Product.Price * item.Quantity).ToString("F2"))</td>
+                        <td>
+                            <button class="contrast outline" 
+                                    style="padding: 5px 10px;"
+                                    hx-post="/Cart/Remove/@item.ShopItemId" 
+                                    hx-target="closest tr" 
+                                    hx-swap="outerHTML">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div style="text-align: right; margin-top: 2rem; border-top: 1px solid #ccc; padding-top: 1rem;">
+            <h3>Total: <span style="color: #10ad10;">$@Model.Sum(x => x.Product.Price * x.Quantity).ToString("F2")</span></h3>
+            <br />
+            <a href="/Checkout" role="button" class="primary" style="padding: 1rem 4rem; font-size: 1.2rem;">
+                Proceed to Checkout
+            </a>
+        </div> @* This closes the "Total" div *@
+    } @* This closes the "else" block *@
+</main> @* This closes the "main" container *@
