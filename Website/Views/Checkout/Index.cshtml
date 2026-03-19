@@ -1,15 +1,65 @@
+@model IEnumerable<Website.Models.CartItem>
+
 <main class="container">
-    <article style="text-align: center; padding: 3rem;">
-        <hgroup>
-            <h1>Checkout</h1>
-            <p>Feature 3: Payment & Order Summary</p>
-        </hgroup>
+  <article>
+    <hgroup>
+      <h1>Checkout Summary</h1>
+      <p>Finalize your order and enjoy your discounts</p>
+    </hgroup>
+
+    <table role="grid">
+      <thead>
+        <tr>
+          <th>Ingredient</th>
+          <th>Price</th>
+          <th>Qty</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach (var item in Model)
+        {
+          <tr>
+            <td><strong>@item.Product?.Name</strong></td>
+            <td>$@item.Product?.Price.ToString("F2")</td>
+            <td>@item.Quantity</td>
+            <td>$@item.Subtotal.ToString("F2")</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <footer style="text-align: right; border-top: 1px solid var(--pico-muted-border-color); padding-top: 1.5rem;">
+      <div style="display: inline-block; min-width: 250px;">
+        <p style="margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+          <span>Subtotal:</span> 
+          <span>$@ViewBag.Subtotal.ToString("F2")</span>
+        </p>
         
-        <p>You have successfully transitioned to the Checkout stage!</p>
-        
-        <div class="grid">
-            <a href="/Cart" class="secondary outline">Back to Cart</a>
-            <button class="primary" disabled>Complete Order (Coming Soon)</button>
-        </div>
-    </article>
+        @if (ViewBag.Discount > 0)
+        {
+          <p style="color: var(--pico-del-color); margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+            <strong>Discount (10%):</strong> 
+            <strong>-$@ViewBag.Discount.ToString("F2")</strong>
+          </p>
+        }
+
+        <hr />
+
+        <h3 style="display: flex; justify-content: space-between;">
+          <span>Total:</span> 
+          <span style="color: var(--pico-ins-color);">$@ViewBag.Total.ToString("F2")</span>
+        </h3>
+      </div>
+      
+      <div class="grid" style="margin-top: 2rem;">
+        <a href="/Cart" class="secondary outline" role="button">Edit Cart</a>
+        <form asp-controller="Checkout" asp-action="PlaceOrder" method="post" style="margin: 0;">
+          <button type="submit" class="primary" style="width: 100%;">
+            Place Order
+          </button>
+        </form>
+      </div>
+    </footer>
+  </article>
 </main>

@@ -1,0 +1,77 @@
+@model IEnumerable<Website.Models.Order>
+
+<main class="container">
+  <hgroup>
+    <h1>@(User.IsInRole("Admin") ? "Manage All Orders" : "My Order History")</h1>
+    <p>Track progress and review past purchases</p>
+  </hgroup>
+
+  @if (Model == null || !Model.Any())
+  {
+    <article>
+      <p>No orders have been placed yet.</p>
+    </article>
+  }
+  else
+  {
+    @foreach (var order in Model)
+    {
+      <article>
+        <header style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <strong>Order #@order.Id</strong><br />
+            <small>@order.OrderDate.ToString("MMM dd, yyyy HH:mm")</small>
+            @if (User.IsInRole("Admin"))
+            {
+              <br /><small>Customer: @(order.User?.DisplayName ?? "User Deleted")</small>
+            }
+          </div>
+          
+          @if (User.IsInRole("Admin"))
+          {
+            <form asp-action="UpdateStatus" method="post" style="margin: 0; display: flex; gap: 10px;">
+              <input type="hidden" name="orderId" value="@order.Id" />
+              <select name="status" onchange="this.form.submit()" style="margin: 0; padding: 5px;">
+                <!option value="Processing" @(order.Status == "Processing" ? "selected" : "")>Processing</!option>
+                <!option value="On The Way" @(order.Status == "On The Way" ? "selected" : "")>On The Way</!option>
+                <!option value="Delivered" @(order.Status == "Delivered" ? "selected" : "")>Delivered</!option>
+              </select>
+            </form>
+          }
+          else
+          {
+            <mark style="background-color: @(order.Status == "Delivered" ? "#4CAF50" : "#ff9800"); color: white; padding: 2px 10px; border-radius: 4px;">
+              @order.Status
+            </mark>
+          }
+        </header>
+
+        <table role="grid">
+          <thead>
+            <tr>
+              <th>Ingredient</th>
+              <th>Qty</th>
+              <th style="text-align: right;">Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach (var item in order.OrderItems)
+            {
+              <tr>
+                <td>@(item.Product?.Name ?? "Item No Longer Available")</td>
+                <td>@item.Quantity</td>
+                <td style="text-align: right;">$@((item.PriceAtPurchase * item.Quantity).ToString("F2"))</td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2"><strong>Total Paid</strong></td>
+              <td style="text-align: right;"><strong>$@order.TotalAmount.ToString("F2")</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </article>
+    }
+  }
+</main>

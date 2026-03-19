@@ -1,77 +1,71 @@
 @model IEnumerable<Website.Models.ShopItem>
 
-<style>
-    /* This forces the grid to wrap and stay at 3 items per row */
-    .marketplace-grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px; /* Space between the cards */
-    }
-
-    .marketplace-grid article {
-        /* (100% / 3) minus a bit for the gaps = approx 31% */
-        flex: 0 0 calc(33.333% - 20px); 
-        margin-bottom: 20px;
-        display: flex;
-        flex-direction: column;
-    }
-
-    /* Responsive: on small screens (phones), show 1 item per row */
-    @@media (max-width: 768px) {
-        .marketplace-grid article {
-            flex: 0 0 100%;
-        }
-    }
-</style>
-
 <main class="container">
-  <div id="toast-container"></div>
-  
   <hgroup>
     <h1>Marketplace</h1>
-    <p>Browsing our fresh ingredients</p>
+    <p>Fresh ingredients for your next recipe</p>
   </hgroup>
 
-  <div class="marketplace-grid">
+  @* This div is the target for htmx success/error messages *@
+  <div id="cart-toast"></div>
+
+  @* Forced 3-column layout as per original style *@
+  <div class="grid" style="grid-template-columns: repeat(3, 1fr); gap: 2rem;">
     @foreach (var item in Model)
     {
-      <article>
-        <header>
-          <strong style="font-size: 1.2rem;">@item.Name</strong>
-          <span style="float: right; font-size: 0.8rem; color: #888;">@item.Calories kcal</span>
-        </header>
-        
-        <img src="@item.ImageUrl" alt="@item.Name" style="height:200px; width:100%; object-fit:cover; border-radius: 8px;">
-        
-        <div style="padding: 10px 0;">
-            <small>@item.Description</small><br/>
-            <small>Stock: <strong>@item.Stock</strong></small>
-        </div>
+      bool isOutOfStock = item.Stock <= 0 || item.Price <= 0;
 
-        <footer style="margin-top: auto;">
+      <article style="display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 0;">
+        <header style="padding: 0;">
+          <div style="position: relative;">
+            <img src="@item.ImageUrl" 
+                 alt="@item.Name" 
+                 style="width: 100%; height: 200px; object-fit: cover; @(isOutOfStock ? "filter: grayscale(100%); opacity: 0.5;" : "")" />
+            
+            @if (isOutOfStock)
+            {
+              <div style="position: absolute; bottom: 0; left: 0; width: 100%;
+                          background: rgba(192, 57, 43, 0.9); color: white; padding: 5px 0; 
+                          font-weight: bold; text-transform: uppercase; z-index: 10; text-align: center;
+                          font-size: 0.8rem; letter-spacing: 1px;">
+                Out of Stock
+              </div>
+            }
+          </div>
+        </header>
+
+        <div style="padding: 1rem;">
+          <h4 style="margin-bottom: 0.5rem;">@item.Name</h4>
+          <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">@item.Description</p>
+          
+          @* Target for OOB swap: update the number instantly *@
+          <small id="stock-@item.Id" style="color: var(--pico-muted-color);">In Stock: @item.Stock</small>
+        </div>
+        
+        <footer style="padding: 1rem; border-top: 1px solid var(--pico-muted-border-color);">
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <ins style="font-size: 1.25rem; text-decoration: none; font-weight: bold;">
-                $@item.Price.ToString("F2")
-            </ins>
-            <button 
-              hx-post="/Cart/AddToCart/@item.Id" 
-              hx-target="#toast-container" 
-              hx-swap="innerHTML"
-              class="outline">
-              Add to Cart
-            </button>
+            <span style="font-weight: bold; font-size: 1.1rem;">
+              $@item.Price.ToString("F2")
+            </span>
+            
+            @if (isOutOfStock)
+            {
+              <button class="secondary outline" disabled style="margin: 0; cursor: not-allowed; font-size: 0.8rem;">
+                Stock Out
+              </button>
+            }
+            else
+            {
+              <button class="primary" 
+                      style="margin: 0; font-size: 0.8rem;"
+                      hx-post="/Cart/AddToCart/@item.Id" 
+                      hx-swap="none">
+                Add to Cart
+              </button>
+            }
           </div>
         </footer>
       </article>
     }
   </div>
 </main>
-
-<script>
-  document.body.addEventListener('htmx:afterRequest', function (evt) {
-    setTimeout(() => {
-      const toast = document.getElementById('cart-toast');
-      if (toast) toast.remove();
-    }, 3000);
-  });
-</script>
