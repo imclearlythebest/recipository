@@ -1,0 +1,26 @@
+<header class="container">
+  <nav>
+    <ul>
+      <li>
+        <strong>
+          <a asp-controller="Home" asp-action="Index" style="text-decoration: none;">
+            <span class="fas fa-utensils"></span> Recipository
+          </a>
+        </strong>
+      </li>
+    <partial name="_NavbarLeft" />
+    </ul>
+    <ul>
+      @if (User.Identity?.IsAuthenticated == true)
+      {
+        <partial name="_AvatarMenu" />
+      }
+      else
+      {
+        <li><a asp-controller="Auth" asp-action="Login">Login</a></li>
+        <li><a asp-controller="Auth" asp-action="Register">Register</a></li>
+      }
+      <li><a id="theme-toggle"><span class=""></span></a></li>
+    </ul>
+  </nav>
+</header>
