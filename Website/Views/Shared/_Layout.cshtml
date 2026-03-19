@@ -1,86 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
+@{
+  Layout = "_BaseLayout";
+}
 
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light dark">
-  <link rel="icon" type="image/svg+xml" href="/images/utensils-solid-full.svg">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="/css/pico.sand.min.css">
-  <link rel="stylesheet" href="/css/style.css" asp-append-version="true">
-  <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js" integrity="sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz" crossorigin="anonymous"></script>
-  @RenderSection("Styles", required: false)
-  <title>@ViewData["Title"] - Recipository</title>
-</head>
+@RenderBody()
 
-<body>
-  <header class="container">
-    <nav>
-      <ul>
-        <li>
-          <strong>
-            <a asp-controller="Home" asp-action="Index" style="text-decoration: none;">
-              <span class="fas fa-utensils"></span> Recipository
-            </a>
-          </strong>
-        </li>
-        <li>
-          <input type="search" name="search" placeholder="Search" aria-label="Search" />
-        </li>
-      </ul>
-      <ul>
-        @RenderSection("NavLinks", required: false)
-        @if (User.Identity?.IsAuthenticated == true)
-        {
-          <partial name="_AvatarMenu" />
-        }
-        else
-        {
-          <li><a asp-controller="Auth" asp-action="Login">Login</a></li>
-          <li><a asp-controller="Auth" asp-action="Register">Register</a></li>
-        }
-        <li><a id="theme-toggle"><span class=""></span></a></li>
-      </ul>
-    </nav>
-  </header>
+@section RightSidebar {
+  <aside>
+    <partial name="_RightSidebar" />
+  </aside>
+}
 
-  <div class="middle container">
-    <aside>
-      <nav>
-        <ul>
-          <li><a asp-controller="Home" asp-action="Index">Home</a></li>
-          <li><a asp-controller="Marketplace" asp-action="Index">Marketplace</a></li>
-          <li><a asp-controller="Cart" asp-action="Index">Cart</a></li>
-          <li><a href="#">Orders</a></li>
-          @if (User.IsInRole("Admin"))
-          {
-            <partial name="_AdminLinks" />
-          }
-        </ul>
-      </nav>
-      <partial name="_LeftSidebar" />
-    </aside>
-    <main class="container">
-      @RenderBody()
-    </main>
-    <aside>
-      <partial name="_RightSidebar" />
-    </aside>
-  </div>
+@section Styles {
+  <style>
+    .middle {
+      grid-template-columns: 250px 1fr 250px;
+    }
 
-  <footer class="container">
-    <nav aria-label="Footer">
-      <ul>
-        <li><a asp-controller="Home" asp-action="About">About</a></li>
-        <li><a asp-controller="Home" asp-action="Contact">Contact</a></li>
-        <li><a asp-controller="Home" asp-action="Privacy">Privacy</a></li>
-      </ul>
-    </nav>
-    <small>© 2026 Recipository. All rights reserved.</small>
-  </footer>
-  <script src="/js/script.js"></script>
-  @RenderSection("Scripts", required: false)
-</body>
-
-</html>
+    .middle>main {
+      border-right: 1px solid var(--pico-muted-border-color);
+    }
+  </style>
+}
