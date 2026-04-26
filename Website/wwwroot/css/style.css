@@ -1,37 +1,87 @@
-body > header {
-    position: sticky;
-    top: 0;
+/* Layout resets */
+html,
+body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    /* Prevent body-level scrolling */
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header styling */
+body>header {
+    flex-shrink: 0;
     background-color: var(--pico-background-color);
     border-bottom: 1px solid var(--pico-muted-border-color);
     z-index: 1000;
+    padding: 0 1rem;
+    /* Reduce vertical padding */
 }
 
-body > footer {
-    border-top: 1px solid var(--pico-muted-border-color);
-}
-
+/* Main layout container */
 .middle {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    min-height: 100vh;
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    /* Container itself shouldn't scroll */
+    width: 100%;
+    max-width: 100%;
+    /* Override Pico's container max-width if necessary */
 }
 
+/* Sidebar and Main content scrolling */
+.middle>aside,
+.middle>main {
+    overflow-y: auto;
+    height: 100%;
+}
+
+.middle>aside {
+    width: 300px;
+    flex-shrink: 0;
+    padding: 1rem;
+    border-right: 1px solid var(--pico-muted-border-color);
+}
+
+/* Right sidebar specific (if we want it different) */
+.middle>aside:last-of-type {
+    border-right: none;
+    border-left: 1px solid var(--pico-muted-border-color);
+}
+
+.middle>main {
+    flex: 1;
+    padding: 2rem;
+}
+
+/* Sidebar refinements */
+aside form {
+    margin: 0;
+}
+
+aside input[type="search"],
+aside input[type="text"],
+aside select {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+    border-radius: 6px;
+}
+
+/* Modifier: Right-only layout */
+.middle.right-only>aside:last-of-type {
+    width: 450px;
+    /* Bigger right sidebar as requested */
+}
+
+/* Card Grid - keeping your existing style */
 .card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: rem;
-}
-
-.middle > aside {
-    position: sticky;
-    top: var(--header-height);
-    padding: 1rem;
-    height: fit-content;
-}
-
-.middle > main {
-    padding: 2rem;
-    border-left: 1px solid var(--pico-muted-border-color);
+    gap: 1rem;
 }
 
 .card-img {
