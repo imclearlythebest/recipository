@@ -14,6 +14,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
   public DbSet<Content> Contents => Set<Content>();
   public DbSet<ContentVote> ContentVotes => Set<ContentVote>();
   public DbSet<Follow> Follows => Set<Follow>();
+  public DbSet<Collection> Collections => Set<Collection>();
+
   public DbSet<Order> Orders => Set<Order>();
   public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
@@ -70,6 +72,14 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             .HasForeignKey(f => f.FollowedId)
             .OnDelete(DeleteBehavior.Cascade);
 
+    });
+
+    modelBuilder.Entity<Collection>(entity =>
+    {
+      entity.HasOne(c => c.User)
+            .WithMany()
+            .HasForeignKey(c => c.ApplicationUserId)
+            .OnDelete(DeleteBehavior.Cascade);
     });
 
     // --- MARKETPLACE & INGREDIENT SEED ---
