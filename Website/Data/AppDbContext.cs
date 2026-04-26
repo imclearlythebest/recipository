@@ -13,6 +13,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
   public DbSet<ShopItem> ShopItems => Set<ShopItem>();
   public DbSet<Content> Contents => Set<Content>();
   public DbSet<ContentVote> ContentVotes => Set<ContentVote>();
+  public DbSet<Follow> Follows => Set<Follow>();
   public DbSet<Order> Orders => Set<Order>();
   public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
@@ -54,6 +55,22 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
 
     });
 
+    modelBuilder.Entity<Follow>(entity =>
+    {
+      entity.HasIndex(f => new { f.FollowerId, f.FollowedId })
+            .IsUnique();
+
+      entity.HasOne(f => f.Follower)
+            .WithMany(u => u.Following)
+            .HasForeignKey(f => f.FollowerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+      entity.HasOne(f => f.Followed)
+            .WithMany(u => u.Followers)
+            .HasForeignKey(f => f.FollowedId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+    });
 
     // --- MARKETPLACE & INGREDIENT SEED ---
     modelBuilder.Entity<ShopItem>().HasData(

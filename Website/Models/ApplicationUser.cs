@@ -8,4 +8,6 @@ public class ApplicationUser: IdentityUser
     public string? Bio { get; set; }
     public string? AvatarUrl { get; set; }
     public ICollection<ContentVote> Votes { get; set; } = [];
+    public ICollection<Follow> Followers { get; set; } = [];
+    public ICollection<Follow> Following { get; set; } = [];
 }
