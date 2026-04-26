@@ -1,9 +1,10 @@
+@model ApplicationUser
 <article>
     <header>
-        <img src="/images/tomato.jpg" alt="User avatar" width="80" height="80" style="border-radius:100%" />
-        <h3>John Doe</h3>
-        <small>@@johndoe</small>
+        <img src="@(Model.AvatarUrl ?? "/images/avatars/default.webp")" alt="User avatar" class="avatar" />
+        <h3>@Model.DisplayName</h3>
+        <small>@@@Model.UserName</small>
     </header>
-    <p>I died long ago.</p>
+    <p>@Model.Bio</p>
     <button>Follow</button>
 </article>
