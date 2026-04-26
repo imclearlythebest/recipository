@@ -9,4 +9,7 @@ public class Content
     public int Upvotes => Votes?.Count(v => v.VoteType == VoteType.Upvote) ?? 0;
     public int Downvotes => Votes?.Count(v => v.VoteType == VoteType.Downvote) ?? 0;
     public int Score => Upvotes - Downvotes;
+    public int? ParentId { get; set; }
+    public Content? Parent { get; set; }
+    public ICollection<Content> Replies { get; set; } = [];
 }

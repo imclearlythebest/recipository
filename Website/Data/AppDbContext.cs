@@ -24,6 +24,16 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
       .HasDiscriminator<string>("IngredientType")
       .HasValue<Ingredient>("Base")
       .HasValue<ShopItem>("Shop");
+    
+    modelBuilder.Entity<Content>(entity =>
+    {
+      entity.HasOne(c => c.Parent)
+            .WithMany()
+            .HasForeignKey(c => c.ParentId)
+            .OnDelete(DeleteBehavior.Cascade);
+            
+    });
+
     modelBuilder.Entity<ContentVote>(entity =>
     {
       entity.HasIndex(v => new { v.ApplicationUserId, v.ContentId })
