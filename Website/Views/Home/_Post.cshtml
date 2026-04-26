@@ -1,9 +1,17 @@
-@model Content
+@model Recipe
 <article>
+    <header>
+        <strong>@Model.Title</strong>
+        <br />
+        <a asp-controller="User" asp-action="Profile" asp-route-username="@Model.Author.UserName">
+            <small>- @Model.Author.DisplayName</small>
+        </a>
+    </header>
     <p>@Model.MainText</p>
     <time datetime="@Model.CreatedAt">@Model.CreatedAt</time>
     <footer>
         <div role="group">
+            <button>@Model.Score</button>
             <button><span class="fas fa-arrow-up" /></button>
             <button><span class="fas fa-arrow-down" /></button>
             <button><span class="fas fa-comment" /></button>
