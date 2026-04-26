@@ -11,7 +11,8 @@ public class UserController(AppDbContext dbContext) : Controller
 
     public IActionResult Profile(string username)
     {
-        return View();
+        var User = _dbContext.Users.FirstOrDefault<ApplicationUser>(u => u.UserName == username);
+        return View(User);
     }
 
 }
