@@ -12,6 +12,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
   public DbSet<Ingredient> Ingredients => Set<Ingredient>();
   public DbSet<ShopItem> ShopItems => Set<ShopItem>();
   public DbSet<Content> Contents => Set<Content>();
+  public DbSet<ContentVote> ContentVotes => Set<ContentVote>();
   public DbSet<Order> Orders => Set<Order>();
   public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
@@ -23,6 +24,26 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
       .HasDiscriminator<string>("IngredientType")
       .HasValue<Ingredient>("Base")
       .HasValue<ShopItem>("Shop");
+    modelBuilder.Entity<ContentVote>(entity =>
+    {
+      entity.HasIndex(v => new { v.ApplicationUserId, v.ContentId })
+            .IsUnique();
+
+      entity.HasOne(v => v.User)
+            .WithMany(u => u.Votes)
+            .HasForeignKey(v => v.ApplicationUserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+      entity.HasOne(v => v.Content)
+            .WithMany(c => c.Votes)
+            .HasForeignKey(v => v.ContentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+      entity.Property(v => v.VoteType)
+            .HasConversion<int>();
+
+    });
+
 
     // --- MARKETPLACE & INGREDIENT SEED ---
     modelBuilder.Entity<ShopItem>().HasData(
@@ -71,4 +92,4 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
       UserId = adminUserId
     });
   }
-}
+}
