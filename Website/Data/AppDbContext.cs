@@ -31,10 +31,14 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     modelBuilder.Entity<Content>(entity =>
     {
       entity.HasOne(c => c.Parent)
-            .WithMany()
+            .WithMany(c => c.Replies)
             .HasForeignKey(c => c.ParentId)
             .OnDelete(DeleteBehavior.Cascade);
-            
+
+      entity.HasOne(c => c.User)
+            .WithMany(u => u.Recipes)
+            .HasForeignKey(c => c.ApplicationUserId)
+            .OnDelete(DeleteBehavior.Cascade);
     });
 
     modelBuilder.Entity<ContentVote>(entity =>
@@ -65,21 +69,25 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
       entity.HasOne(f => f.Follower)
             .WithMany(u => u.Following)
             .HasForeignKey(f => f.FollowerId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
 
       entity.HasOne(f => f.Followed)
             .WithMany(u => u.Followers)
             .HasForeignKey(f => f.FollowedId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
 
     });
 
     modelBuilder.Entity<Collection>(entity =>
     {
       entity.HasOne(c => c.User)
-            .WithMany()
+            .WithMany(u => u.Collections)
             .HasForeignKey(c => c.ApplicationUserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+      entity.HasMany(c => c.Recipes)
+            .WithMany(r => r.Collections)
+            .UsingEntity(j => j.ToTable("CollectionRecipes"));
     });
 
     // --- MARKETPLACE & INGREDIENT SEED ---
@@ -92,9 +100,9 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     );
 
     modelBuilder.Entity<Content>().HasData(
-      new Content { Id = 1, MainText = "This is some content.", CreatedAt = new DateTime(2024, 6, 1) },
-      new Content { Id = 2, MainText = "This is some more content.", CreatedAt = new DateTime(2024, 6, 2) },
-      new Content { Id = 3, MainText = "This is even more content.", CreatedAt = new DateTime(2024, 6, 3) }
+      new Content { Id = 1, MainText = "This is some content.", CreatedAt = new DateTime(2024, 6, 1), ApplicationUserId = adminUserId },
+      new Content { Id = 2, MainText = "This is some more content.", CreatedAt = new DateTime(2024, 6, 2), ApplicationUserId = adminUserId },
+      new Content { Id = 3, MainText = "This is even more content.", CreatedAt = new DateTime(2024, 6, 3), ApplicationUserId = adminUserId }
     );
 
     // --- ADMIN SEEDING (FIXED) ---
