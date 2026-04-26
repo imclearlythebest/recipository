@@ -10,4 +10,5 @@ public class ApplicationUser: IdentityUser
     public ICollection<ContentVote> Votes { get; set; } = [];
     public ICollection<Follow> Followers { get; set; } = [];
     public ICollection<Follow> Following { get; set; } = [];
+    public ICollection<Collection> Collections  { get; set; } = [];
 }
