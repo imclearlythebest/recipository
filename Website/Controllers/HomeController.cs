@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Website.Data;
 
 namespace Website.Controllers;
@@ -8,8 +9,8 @@ public class HomeController(AppDbContext dbContext) : Controller
 
     public IActionResult Index()
     {
-        var contents = _dbContext.Contents.ToList();
-        return View(contents);
+        var recipes = _dbContext.Recipes.Include(r => r.Author).ToList();
+        return View(recipes);
 
     }
     public IActionResult About() => View();
