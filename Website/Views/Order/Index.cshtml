@@ -1,5 +1,9 @@
 @model IEnumerable<Website.Models.Order>
 
+@{
+  ViewData["Title"] = User.IsInRole("Admin") ? "Manage Orders" : "My Orders";
+}
+
 <main class="container">
   <hgroup>
     <h1>@(User.IsInRole("Admin") ? "Manage All Orders" : "My Order History")</h1>
