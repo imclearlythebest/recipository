@@ -17,4 +17,40 @@ public class MarketplaceController : Controller
     var items = await _context.Ingredients.OfType<ShopItem>().ToListAsync();
     return View(items);
   }
+
+  public async Task<IActionResult> Filter(string? search, IngredientType? type, bool hideOutOfStock, string? priceRange)
+  {
+    var query = _context.Ingredients.OfType<ShopItem>().AsQueryable();
+
+    if (!string.IsNullOrEmpty(search))
+    {
+      var lowSearch = search.ToLower();
+      query = query.Where(i => (i.Name != null && i.Name.ToLower().Contains(lowSearch)) || 
+                               (i.Description != null && i.Description.ToLower().Contains(lowSearch)));
+    }
+
+    if (type.HasValue)
+    {
+      query = query.Where(i => i.Type == type.Value);
+    }
+
+    if (hideOutOfStock)
+    {
+      query = query.Where(i => i.Stock > 0);
+    }
+
+    if (!string.IsNullOrEmpty(priceRange) && priceRange != "all")
+    {
+      query = priceRange switch
+      {
+        "under-10" => query.Where(i => i.Price < 10),
+        "10-25" => query.Where(i => i.Price >= 10 && i.Price <= 25),
+        "over-25" => query.Where(i => i.Price > 25),
+        _ => query
+      };
+    }
+
+    var items = await query.ToListAsync();
+    return PartialView("_MarketplaceGrid", items);
+  }
 }
