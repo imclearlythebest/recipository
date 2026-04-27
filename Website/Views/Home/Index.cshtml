@@ -4,7 +4,6 @@
 
 @model List<Recipe>
 
-@foreach (var Post in Model)
-{   
-    <partial name='_Post.cshtml' model='Post' />
-}
+<div id="home-feed">
+    <partial name="_HomeFeed" model="Model" />
+</div>

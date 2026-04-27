@@ -92,11 +92,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
 
     // --- MARKETPLACE & INGREDIENT SEED ---
     modelBuilder.Entity<ShopItem>().HasData(
-      new ShopItem { Id = 1, Name = "Tomato", Description = "Red, juicy fruit", ImageUrl = "/images/tomato.jpg", Calories = 20, Price = 0.50f, Stock = 100, Moq = 1, Increment = 1 },
-      new ShopItem { Id = 2, Name = "Onion", Description = "Pungent bulb", ImageUrl = "/images/onion.jpg", Calories = 40, Price = 0.30f, Stock = 50, Moq = 1, Increment = 1 },
-      new ShopItem { Id = 3, Name = "Garlic", Description = "Strong-flavored bulb", ImageUrl = "/images/garlic.jpg", Calories = 30, Price = 0.20f, Stock = 100, Moq = 1, Increment = 1 },
-      new ShopItem { Id = 4, Name = "Salt", Description = "Fine sea salt", ImageUrl = "/images/salt.jpg", Calories = 0, Price = 1.50f, Stock = 100, Moq = 1, Increment = 1 },
-      new ShopItem { Id = 5, Name = "Olive Oil", Description = "Extra virgin", ImageUrl = "/images/oil.jpg", Calories = 120, Price = 8.99f, Stock = 50, Moq = 1, Increment = 1 }
+      new ShopItem { Id = 1, Name = "Tomato", Description = "Red, juicy fruit", ImageUrl = "/images/tomato.jpg", Calories = 20, Price = 0.50f, Stock = 100, Moq = 1, Increment = 1, Type=IngredientType.Vegetable },
+      new ShopItem { Id = 2, Name = "Onion", Description = "Pungent bulb", ImageUrl = "/images/onion.jpg", Calories = 40, Price = 0.30f, Stock = 50, Moq = 1, Increment = 1, Type=IngredientType.Vegetable },
+      new ShopItem { Id = 3, Name = "Garlic", Description = "Strong-flavored bulb", ImageUrl = "/images/garlic.jpg", Calories = 30, Price = 0.20f, Stock = 100, Moq = 1, Increment = 1, Type=IngredientType.Spice },
+      new ShopItem { Id = 4, Name = "Salt", Description = "Fine sea salt", ImageUrl = "/images/salt.jpg", Calories = 0, Price = 1.50f, Stock = 0, Moq = 1, Increment = 1, Type=IngredientType.Spice },
+      new ShopItem { Id = 5, Name = "Olive Oil", Description = "Extra virgin", ImageUrl = "/images/oil.jpg", Calories = 120, Price = 8.99f, Stock = 50, Moq = 1, Increment = 1, Type=IngredientType.Other }
     );
 
     string adminRoleId = "5307567e-613d-4c31-92f7-08064d142d7b"; // Fixed GUID

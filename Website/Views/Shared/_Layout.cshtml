@@ -17,7 +17,7 @@
 <body>
   <partial name="_Header" />
 
-  <div class="middle container-fluid @(ViewData["LayoutType"]?.ToString() == "RightOnly" ? "right-only" : "")">
+  <div class="middle @(ViewData["LayoutType"]?.ToString() == "RightOnly" ? "right-only" : "")">
     @if (ViewData["LayoutType"]?.ToString() != "RightOnly")
     {
       <aside>
