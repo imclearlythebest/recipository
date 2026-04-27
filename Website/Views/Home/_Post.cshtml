@@ -1,4 +1,12 @@
 @model Recipe
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var currentUser = await UserManager.GetUserAsync(User);
+    var userVote = Model.Votes.FirstOrDefault(v => v.ApplicationUserId == currentUser?.Id);
+}
+
 <article>
     <header>
         <strong>@Model.Title</strong>
@@ -10,11 +18,27 @@
     <p>@Model.MainText</p>
     <time datetime="@Model.CreatedAt">@Model.CreatedAt</time>
     <footer>
-        <div role="group">
-            <button>@Model.Score</button>
-            <button><span class="fas fa-arrow-up" /></button>
-            <button><span class="fas fa-arrow-down" /></button>
-            <button><span class="fas fa-comment" /></button>
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+            <span style="font-weight: bold; min-width: 2rem; text-align: center;">@Model.Score</span>
+            @if (currentUser != null)
+            {
+                <form asp-controller="Home" asp-action="Upvote" asp-route-contentId="@Model.Id" method="post" style="margin: 0; padding: 0;">
+                    <button type="submit" class="@(userVote?.VoteType == VoteType.Upvote ? "secondary" : "secondary outline")" style="margin: 0; padding: 0.5rem 0.75rem;">
+                        <span class="fas fa-arrow-up" />
+                    </button>
+                </form>
+                <form asp-controller="Home" asp-action="Downvote" asp-route-contentId="@Model.Id" method="post" style="margin: 0; padding: 0;">
+                    <button type="submit" class="@(userVote?.VoteType == VoteType.Downvote ? "secondary" : "secondary outline")" style="margin: 0; padding: 0.5rem 0.75rem;">
+                        <span class="fas fa-arrow-down" />
+                    </button>
+                </form>
+            }
+            else
+            {
+                <button disabled class="secondary outline" style="margin: 0; padding: 0.5rem 0.75rem;"><span class="fas fa-arrow-up" /></button>
+                <button disabled class="secondary outline" style="margin: 0; padding: 0.5rem 0.75rem;"><span class="fas fa-arrow-down" /></button>
+            }
+            <button class="secondary outline" style="margin: 0; padding: 0.5rem 0.75rem;"><span class="fas fa-comment" /></button>
         </div>
     </footer>
 </article>
