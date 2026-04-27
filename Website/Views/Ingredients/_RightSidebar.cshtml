@@ -1,0 +1,35 @@
+@{
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+}
+
+<section>
+  <button type="button" onclick="window.history.back()" style="width: 100%;">
+    <i class="fas fa-arrow-left"></i> Back
+  </button>
+</section>
+
+@if (action == "Index")
+{
+  <form id="filter-form" 
+        hx-get="/Ingredients/Filter" 
+        hx-target="#ingredients-grid" 
+        hx-trigger="change, keyup delay:300ms changed">
+                   
+    <section>
+      <label for="search">Search</label>
+      <input type="search" id="search" name="search" placeholder="Search ingredients..." />
+    </section>
+
+    <section>
+      <h6>Category</h6>
+      <select name="type">
+        <option value="">All Categories</option>
+        <option value="Vegetable">Vegetables</option>
+        <option value="Fruit">Fruits</option>
+        <option value="Meat">Meat</option>
+        <option value="Dairy">Dairy</option>
+        <option value="Spice">Spices</option>
+      </select>
+    </section>
+  </form>
+}

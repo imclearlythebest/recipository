@@ -1,0 +1,35 @@
+@model Website.Models.Ingredient
+
+@{
+    ViewData["Title"] = ViewData["FormTitle"]?.ToString() ?? "Ingredient";
+    var subtitle = ViewData["FormSubtitle"]?.ToString() ?? string.Empty;
+    var submitLabel = ViewData["SubmitLabel"]?.ToString() ?? "Save";
+    var formAction = ViewData["FormAction"]?.ToString() ?? "Create";
+    var isEdit = (ViewData["IsEdit"] as bool?) ?? false;
+    var formUrl = isEdit
+        ? Url.Action(formAction, "Ingredients", new { id = Model.Id })
+        : Url.Action(formAction, "Ingredients");
+}
+
+<main class="container">
+    <hgroup>
+        <h1>@ViewData["FormTitle"]</h1>
+        <p>@subtitle</p>
+    </hgroup>
+
+    <form method="post" action="@formUrl">
+        @Html.AntiForgeryToken()
+
+        @if (isEdit)
+        {
+            <input type="hidden" asp-for="Id" />
+        }
+
+        <partial name="_IngredientFields" model="Model" />
+
+        <div class="grid" style="margin-top: 2rem;">
+            <button type="submit">@submitLabel</button>
+            <button type="button" class="secondary outline" onclick="window.history.back()">Cancel</button>
+        </div>
+    </form>
+</main>

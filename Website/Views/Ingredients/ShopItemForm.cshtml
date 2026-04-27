@@ -1,0 +1,42 @@
+@model Website.Models.ShopItem
+
+@{
+    ViewData["Title"] = ViewData["FormTitle"]?.ToString() ?? "Shop Item";
+    var subtitle = ViewData["FormSubtitle"]?.ToString() ?? string.Empty;
+    var submitLabel = ViewData["SubmitLabel"]?.ToString() ?? "Save";
+    var formAction = ViewData["FormAction"]?.ToString() ?? "CreateShopItem";
+    var isEdit = (ViewData["IsEdit"] as bool?) ?? false;
+    var formUrl = isEdit
+        ? Url.Action(formAction, "Ingredients", new { id = Model.Id })
+        : Url.Action(formAction, "Ingredients");
+    var originalId = ViewData["OriginalId"];
+}
+
+<main class="container">
+    <hgroup>
+        <h1>@ViewData["FormTitle"]</h1>
+        <p>@subtitle</p>
+    </hgroup>
+
+    <form method="post" action="@formUrl">
+        @Html.AntiForgeryToken()
+
+        @if (isEdit)
+        {
+            <input type="hidden" asp-for="Id" />
+        }
+
+        @if (!isEdit && originalId != null)
+        {
+            <input type="hidden" name="originalId" value="@originalId" />
+        }
+
+        <partial name="_IngredientFields" model="Model" />
+        <partial name="_ShopItemFields" model="Model" />
+
+        <div class="grid" style="margin-top: 2rem;">
+            <button type="submit">@submitLabel</button>
+            <button type="button" class="secondary outline" onclick="window.history.back()">Cancel</button>
+        </div>
+    </form>
+</main>
