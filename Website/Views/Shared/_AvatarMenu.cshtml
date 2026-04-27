@@ -1,11 +1,25 @@
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var user = await UserManager.GetUserAsync(User);
+}
+
 <li>
   <details class="dropdown">
     <summary>
-      <span class="fas fa-circle-user"></span>
+      @if (user?.AvatarUrl != null)
+      {
+        <img src="@user.AvatarUrl" alt="User avatar" class="avatar" style="width: 32px; height: 32px; border-radius: 50%; margin: 0;" />
+      }
+      else
+      {
+        <span class="fas fa-circle-user"></span>
+      }
     </summary>
     <ul>
-      <li><a asp-controller="User" asp-action="Profile">Profile</a></li>
-      <li><a asp-controller="User" asp-action="Settings">Settings</a></li>
+      <li><a asp-controller="User" asp-action="Profile" asp-route-username="@user?.UserName">Profile</a></li>
+      <li><a asp-controller="User" asp-action="Edit">Settings</a></li>
       <li><a asp-controller="Auth" asp-action="Logout">Logout</a></li>
     </ul>
   </details>
