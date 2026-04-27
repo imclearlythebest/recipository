@@ -5,7 +5,7 @@
 
 @model IEnumerable<Website.Models.ShopItem>
 
-<main class="container">
+<section class="container">
   <hgroup>
     <h1>Marketplace</h1>
     <p>Fresh ingredients for your next recipe</p>
@@ -15,7 +15,7 @@
   <div id="cart-toast"></div>
 
   @* Forced 3-column layout as per original style *@
-  <div id="marketplace-grid" class="grid" style="grid-template-columns: repeat(3, 1fr); gap: 2rem;">
+  <div id="marketplace-grid" class="card-grid">
     <partial name="_MarketplaceGrid" model="Model" />
   </div>
-</main>
+</section>
