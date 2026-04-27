@@ -4,6 +4,10 @@ public static class Routes
     public static void MapAppRoutes(this WebApplication app)
     {
         app.MapControllerRoute(
+            name: "user-actions",
+            pattern: "User/{action}/{username?}",
+            defaults: new { controller = "User" });
+        app.MapControllerRoute(
             name: "user-profile",
             pattern: "User/{username}",
             defaults: new { controller = "User", action = "Profile" });
