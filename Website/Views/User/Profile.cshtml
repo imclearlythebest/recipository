@@ -1,4 +1,12 @@
 @model ApplicationUser
+@{
+    var currentUserId = ViewData["CurrentUserId"]?.ToString();
+    var isOwnProfile = (bool)(ViewData["IsOwnProfile"] ?? false);
+    var isFollowing = (bool)(ViewData["IsFollowing"] ?? false);
+    var isLoggedIn = !string.IsNullOrEmpty(currentUserId);
+    ViewData["Title"] = $"{Model.DisplayName}'s Profile";
+}
+
 <article>
     <header>
         <img src="@(Model.AvatarUrl ?? "/images/avatars/default.webp")" alt="User avatar" class="avatar" />
@@ -6,5 +14,26 @@
         <small>@@@Model.UserName</small>
     </header>
     <p>@Model.Bio</p>
-    <button>Follow</button>
+
+    @if (isOwnProfile)
+    {
+        <div class="grid" style="margin-top: 1rem;">
+            <a asp-controller="User" asp-action="Edit" class="button">Edit Profile</a>
+        </div>
+    }
+    else if (isLoggedIn)
+    {
+        @if (isFollowing)
+        {
+            <form asp-controller="User" asp-action="Unfollow" asp-route-username="@Model.UserName" method="post" style="display: inline;">
+                <button type="submit" class="secondary outline">Unfollow</button>
+            </form>
+        }
+        else
+        {
+            <form asp-controller="User" asp-action="Follow" asp-route-username="@Model.UserName" method="post" style="display: inline;">
+                <button type="submit">Follow</button>
+            </form>
+        }
+    }
 </article>
