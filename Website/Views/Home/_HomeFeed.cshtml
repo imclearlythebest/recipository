@@ -1,6 +1,15 @@
 @model List<Recipe>
 
-@foreach (var Post in Model)
-{   
-    <partial name='_Post.cshtml' model='Post' />
+@if (!Model.Any())
+{
+    <article>
+        <p style="text-align: center; padding: 2rem;">No recipes found. Try adjusting your filters.</p>
+    </article>
+}
+else
+{
+    @foreach (var Post in Model)
+    {   
+        <partial name='_Post.cshtml' model='Post' />
+    }
 }

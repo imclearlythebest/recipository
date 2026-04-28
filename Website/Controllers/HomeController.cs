@@ -12,19 +12,29 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
     private readonly AppDbContext _dbContext = dbContext;
     private readonly UserManager<ApplicationUser> _userManager = userManager;
 
-    public IActionResult Index()
+    public IActionResult Index(string? feedType = "global")
     {
-        var recipes = _dbContext.Recipes
+        var currentUser = _userManager.GetUserAsync(User).GetAwaiter().GetResult();
+        var query = _dbContext.Recipes
             .Include(r => r.Author)
             .Include(r => r.Votes)
             .Include(r => r.Replies.OrderByDescending(c => c.CreatedAt))
             .ThenInclude(c => c.Author)
             .Include(r => r.Replies)
             .ThenInclude(c => c.Votes)
-            .OrderByDescending(r => r.CreatedAt)
-            .ToList();
+            .AsQueryable();
+
+        if (feedType == "followers" && currentUser != null)
+        {
+            var followedUserIds = _dbContext.Follows
+                .Where(f => f.FollowerId == currentUser.Id)
+                .Select(f => f.FollowedId)
+                .ToList();
+            query = query.Where(r => followedUserIds.Contains(r.ApplicationUserId));
+        }
+
+        var recipes = query.OrderByDescending(r => r.CreatedAt).ToList();
         // populate user collections for feed picker
-        var currentUser = _userManager.GetUserAsync(User).GetAwaiter().GetResult();
         if (currentUser != null)
         {
             var userCollections = _dbContext.Collections
@@ -59,8 +69,16 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
         return View(recipes);
     }
 
-    public IActionResult Filter(string? search, string? sortBy, string? time)
+    public IActionResult Filter(string? search, string? sortBy, string? time, string? feedType)
     {
+        // If feedType is passed from checkbox, it's either "followers" or not in the form data at all
+        // HTMX doesn't submit unchecked checkboxes, so we need to default to "global"
+        if (string.IsNullOrEmpty(feedType))
+        {
+            feedType = "global";
+        }
+
+        var currentUser = _userManager.GetUserAsync(User).GetAwaiter().GetResult();
         var query = _dbContext.Recipes
             .Include(r => r.Author)
             .Include(r => r.Votes)
@@ -69,6 +87,15 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
             .Include(r => r.Replies)
             .ThenInclude(c => c.Votes)
             .AsQueryable();
+
+        if (feedType == "followers" && currentUser != null)
+        {
+            var followedUserIds = _dbContext.Follows
+                .Where(f => f.FollowerId == currentUser.Id)
+                .Select(f => f.FollowedId)
+                .ToList();
+            query = query.Where(r => followedUserIds.Contains(r.ApplicationUserId));
+        }
 
         if (!string.IsNullOrEmpty(search))
         {
@@ -100,7 +127,6 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
         var recipes = query.ToList();
 
         // populate user collections for feed picker (partial requests)
-        var currentUser = _userManager.GetUserAsync(User).GetAwaiter().GetResult();
         if (currentUser != null)
         {
             var userCollections = _dbContext.Collections
