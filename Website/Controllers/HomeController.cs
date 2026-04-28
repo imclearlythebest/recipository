@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Website.Data;
 using Website.Models;
+using Website.Models.ViewModels;
 
 namespace Website.Controllers;
 public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser> userManager) : Controller
@@ -16,6 +17,10 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
         var recipes = _dbContext.Recipes
             .Include(r => r.Author)
             .Include(r => r.Votes)
+            .Include(r => r.Replies.OrderByDescending(c => c.CreatedAt))
+            .ThenInclude(c => c.Author)
+            .Include(r => r.Replies)
+            .ThenInclude(c => c.Votes)
             .OrderByDescending(r => r.CreatedAt)
             .ToList();
         return View(recipes);
@@ -26,6 +31,10 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
         var query = _dbContext.Recipes
             .Include(r => r.Author)
             .Include(r => r.Votes)
+            .Include(r => r.Replies.OrderByDescending(c => c.CreatedAt))
+            .ThenInclude(c => c.Author)
+            .Include(r => r.Replies)
+            .ThenInclude(c => c.Votes)
             .AsQueryable();
 
         if (!string.IsNullOrEmpty(search))
@@ -59,13 +68,47 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
         return PartialView("_HomeFeed", recipes);
     }
 
+    public async Task<IActionResult> Post(int id)
+    {
+        var recipe = await _dbContext.Recipes
+            .Include(r => r.Author)
+            .Include(r => r.Votes)
+            .Include(r => r.Replies.OrderByDescending(c => c.CreatedAt))
+            .ThenInclude(c => c.Author)
+            .Include(r => r.Replies)
+            .ThenInclude(c => c.Votes)
+            .FirstOrDefaultAsync(r => r.Id == id);
+
+        if (recipe == null) return NotFound();
+
+        return View(recipe);
+    }
+
+    public async Task<IActionResult> Comment(int id)
+    {
+        var comment = await _dbContext.Contents
+            .OfType<Content>()
+            .Include(c => c.Author)
+            .Include(c => c.Votes)
+            .Include(c => c.Parent)
+            .Include(c => c.Replies.OrderByDescending(r => r.CreatedAt))
+            .ThenInclude(r => r.Author)
+            .Include(c => c.Replies)
+            .ThenInclude(r => r.Votes)
+            .FirstOrDefaultAsync(c => c.Id == id && c.ParentId != null);
+
+        if (comment == null) return NotFound();
+
+        return View(comment);
+    }
+
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> Upvote(int contentId)
+    public async Task<IActionResult> Upvote(int contentId, string? returnUrl = null)
     {
-        var content = await _dbContext.Recipes
-            .Include(r => r.Votes)
-            .FirstOrDefaultAsync(r => r.Id == contentId);
+        var content = await _dbContext.Contents
+            .Include(c => c.Votes)
+            .FirstOrDefaultAsync(c => c.Id == contentId);
 
         if (content == null) return NotFound();
 
@@ -98,16 +141,29 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
         }
 
         await _dbContext.SaveChangesAsync();
+
+        if (Request.Headers["HX-Request"] == "true")
+        {
+            var updatedContent = await _dbContext.Contents
+                .Include(c => c.Votes)
+                .FirstAsync(c => c.Id == contentId);
+
+            return PartialView("_VoteControls", CreateVoteControlsViewModel(updatedContent, returnUrl, currentUser.Id));
+        }
+
+        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            return Redirect(returnUrl);
+        
         return RedirectToAction(nameof(Index));
     }
 
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> Downvote(int contentId)
+    public async Task<IActionResult> Downvote(int contentId, string? returnUrl = null)
     {
-        var content = await _dbContext.Recipes
-            .Include(r => r.Votes)
-            .FirstOrDefaultAsync(r => r.Id == contentId);
+        var content = await _dbContext.Contents
+            .Include(c => c.Votes)
+            .FirstOrDefaultAsync(c => c.Id == contentId);
 
         if (content == null) return NotFound();
 
@@ -140,7 +196,34 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
         }
 
         await _dbContext.SaveChangesAsync();
+
+        if (Request.Headers["HX-Request"] == "true")
+        {
+            var updatedContent = await _dbContext.Contents
+                .Include(c => c.Votes)
+                .FirstAsync(c => c.Id == contentId);
+
+            return PartialView("_VoteControls", CreateVoteControlsViewModel(updatedContent, returnUrl, currentUser.Id));
+        }
+
+        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            return Redirect(returnUrl);
+        
         return RedirectToAction(nameof(Index));
+    }
+
+    private static VoteControlsViewModel CreateVoteControlsViewModel(Content content, string? returnUrl, string currentUserId)
+    {
+        var userVote = content.Votes.FirstOrDefault(v => v.ApplicationUserId == currentUserId);
+
+        return new VoteControlsViewModel
+        {
+            ContentId = content.Id,
+            Score = content.Score,
+            UserVote = userVote?.VoteType,
+            CanVote = true,
+            ReturnUrl = returnUrl ?? string.Empty
+        };
     }
 
     public IActionResult About() => View();

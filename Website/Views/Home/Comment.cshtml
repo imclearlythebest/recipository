@@ -1,0 +1,60 @@
+@model Content
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var currentUser = await UserManager.GetUserAsync(User);
+    var userVote = Model.Votes.FirstOrDefault(v => v.ApplicationUserId == currentUser?.Id);
+    var voteReturnUrl = Url.Action("Comment", "Home", new { id = Model.Id });
+    var backLink = Model.Parent is Recipe parentRecipe
+        ? Url.Action("Post", "Home", new { id = parentRecipe.Id })
+        : Model.Parent is Content parentComment
+            ? Url.Action("Comment", "Home", new { id = parentComment.Id })
+            : Url.Action("Index", "Home");
+    ViewData["Title"] = "View Comment";
+}
+
+<p><a href="@backLink">← Back</a></p>
+
+<article>
+    <header>
+        <a asp-controller="User" asp-action="Profile" asp-route-username="@Model.Author.UserName">
+            <strong>@Model.Author.DisplayName</strong>
+        </a>
+        <time datetime="@Model.CreatedAt.ToUniversalTime():O">@Model.CreatedAt.ToLocalTime().ToString("g")</time>
+    </header>
+    <p>@Model.MainText</p>
+    <footer>
+        @{
+            var vc = new Website.Models.ViewModels.VoteControlsViewModel
+            {
+                ContentId = Model.Id,
+                Score = Model.Score,
+                UserVote = userVote?.VoteType,
+                CanVote = currentUser != null,
+                ReturnUrl = voteReturnUrl ?? string.Empty
+            };
+        }
+        @await Html.PartialAsync("_VoteControls", vc)
+    </footer>
+</article>
+
+<h3>Replies (@Model.Replies.Count)</h3>
+
+@if (currentUser != null)
+{
+    <article>
+        <form asp-controller="Content" asp-action="AddReply" asp-route-parentId="@Model.Id" method="post" hx-post="@Url.Action("AddReply", "Content")" hx-target="#comments-@Model.Id" hx-swap="innerHTML">
+            <input type="hidden" name="parentId" value="@Model.Id" />
+            <label for="reply-text">
+                Add a Reply
+                <textarea id="reply-text" name="text" placeholder="What do you think?" required rows="3"></textarea>
+            </label>
+            <button type="submit">Post Reply</button>
+        </form>
+    </article>
+}
+
+<div id="comments-@Model.Id">
+    <partial name="_CommentsList" model="Model.Replies.OrderByDescending(c => c.CreatedAt).ToList()" />
+</div>
