@@ -5,6 +5,8 @@ public class Collection
     public int Id { get; set; }
     public string ApplicationUserId { get; set; } = null!;
     public string Name { get; set; } = null!;
+    public string PublicUrl { get; set; } = null!;
+    public string? CoverPhotoUrl { get; set; }
     public ApplicationUser User { get; set; } = null!;
     public ICollection<Recipe> Recipes { get; set; } = new HashSet<Recipe>();
 }

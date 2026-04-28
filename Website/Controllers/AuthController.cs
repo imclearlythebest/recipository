@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Website.Models;
 using Website.Models.Dtos;
+using Website.Data;
 
 
 namespace Website.Controllers;
@@ -10,12 +11,15 @@ public class AuthController: Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly AppDbContext _dbContext;
     public AuthController(
         UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager)
+        SignInManager<ApplicationUser> signInManager,
+        AppDbContext dbContext)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _dbContext = dbContext;
     }
     [HttpGet]
     public IActionResult Login() => View();
@@ -46,6 +50,17 @@ public class AuthController: Controller
         var result = await _userManager.CreateAsync(user, model.Password);
         if (result.Succeeded)
         {
+            // Create a default collection for new users
+            var defaultCollection = new Collection
+            {
+                ApplicationUserId = user.Id,
+                Name = "My Recipes",
+                PublicUrl = Guid.NewGuid().ToString("N")
+            };
+
+            _dbContext.Collections.Add(defaultCollection);
+            await _dbContext.SaveChangesAsync();
+
             await _signInManager.SignInAsync(user, isPersistent: true);
             return RedirectToAction("Index", "Home");
         }

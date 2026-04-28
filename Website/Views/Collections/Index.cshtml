@@ -1,0 +1,39 @@
+@model Website.Models.ViewModels.CollectionsIndexViewModel
+@{
+    ViewData["Title"] = "Collections";
+}
+
+<section class="grid">
+    <div>
+        <h1>Collections</h1>
+        <p>Group your recipes into named collections and share them with a public link.</p>
+    </div>
+    <div style="text-align:right;">
+        <a asp-controller="Collections" asp-action="Create" class="button">New Collection</a>
+    </div>
+</section>
+
+@if (!Model.OwnedCollections.Any())
+{
+    <article>
+        <p>You do not have any collections yet.</p>
+    </article>
+}
+else
+{
+    <div class="card-grid">
+        @foreach (var collection in Model.OwnedCollections)
+        {
+            <article>
+                @if (!string.IsNullOrWhiteSpace(collection.CoverPhotoUrl))
+                {
+                    <a asp-controller="Collections" asp-action="Details" asp-route-id="@collection.Id">
+                        <img src="@collection.CoverPhotoUrl" alt="@collection.Name cover" style="width:100%;border-radius:0.5rem;object-fit:cover;max-height:180px;" />
+                    </a>
+                }
+                <h3><a asp-controller="Collections" asp-action="Details" asp-route-id="@collection.Id">@collection.Name</a></h3>
+                <p>@collection.Recipes.Count recipe(s)</p>
+            </article>
+        }
+    </div>
+}

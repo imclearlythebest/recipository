@@ -1,0 +1,47 @@
+@model Website.Models.Collection
+@{
+    ViewData["Title"] = Model.Name;
+    var publicShareUrl = ViewData["PublicShareUrl"]?.ToString();
+    var isPublicView = (bool)(ViewData["IsPublicView"] ?? false);
+    ViewData["CollectionId"] = Model.Id;
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.CoverPhotoUrl))
+{
+    <article>
+        <img src="@Model.CoverPhotoUrl" alt="@Model.Name cover" style="width:100%;border-radius:0.5rem;object-fit:cover;max-height:280px;" />
+    </article>
+}
+
+<h1>@Model.Name</h1>
+<small>by @Model.User.DisplayName</small>
+
+<h2>Recipes (@Model.Recipes.Count)</h2>
+
+@if (!Model.Recipes.Any())
+{
+    <article>
+        <p>This collection does not have any recipes yet.</p>
+    </article>
+}
+else
+{
+    <div class="card-grid">
+        @foreach (var recipe in Model.Recipes)
+        {
+            <article>
+                <h3><a asp-controller="Home" asp-action="Post" asp-route-id="@recipe.Id">@recipe.Title</a></h3>
+                <p>@recipe.MainText</p>
+                @if (!isPublicView)
+                {
+                    <form asp-action="RemoveRecipe" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="collectionId" value="@Model.Id" />
+                        <input type="hidden" name="recipeId" value="@recipe.Id" />
+                        <button type="submit" class="secondary outline">Remove</button>
+                    </form>
+                }
+            </article>
+        }
+    </div>
+}

@@ -1,0 +1,8 @@
+@if (User.Identity?.IsAuthenticated == true)
+{
+	<nav>
+		<ul>
+			<li><a asp-controller="Collections" asp-action="Index">Collections</a></li>
+		</ul>
+	</nav>
+}

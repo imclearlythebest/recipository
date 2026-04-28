@@ -1,0 +1,31 @@
+@model Website.Models.ViewModels.CollectionCreateViewModel
+@{
+    ViewData["Title"] = "Edit Collection";
+    var id = ViewData["CollectionId"] ?? 0;
+    ViewData.Remove("CollectionId"); // don't show sidebar on edit page
+}
+
+<main class="container">
+    <h1>Edit Collection</h1>
+
+    <form asp-action="Edit" method="post" asp-route-id="@id">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly"></div>
+
+        <label asp-for="Name">
+            Name
+            <input asp-for="Name" placeholder="Summer dinners" />
+        </label>
+        <span asp-validation-for="Name"></span>
+
+        <label asp-for="CoverPhotoUrl">
+            Cover Photo URL
+            <input asp-for="CoverPhotoUrl" placeholder="/images/collections/summer.jpg" />
+        </label>
+
+        <div class="grid" style="margin-top: 1.5rem;">
+            <button type="submit">Save Changes</button>
+            <button type="button" class="secondary outline" onclick="window.history.back()">Cancel</button>
+        </div>
+    </form>
+</main>

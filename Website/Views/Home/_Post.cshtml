@@ -31,9 +31,53 @@
                 };
             }
             @await Html.PartialAsync("_VoteControls", vc)
-            <a asp-controller="Home" asp-action="Post" asp-route-id="@Model.Id" class="secondary outline" title="Comments" style="margin: 0; padding: 0.5rem 0.75rem;">
+            <button type="button" class="secondary outline" onclick="window.location.href='@Url.Action("Post", "Home", new { id = Model.Id })'" title="Comments" style="margin: 0; padding: 0.5rem 0.75rem;">
                 <span class="fas fa-comment"></span>
-            </a>
+            </button>
+
+            @* Save to Collection (feed) *@
+            @{
+                var userCollections = ViewData["UserCollections"] as List<Collection> ?? new List<Collection>();
+            }
+            @if (currentUser != null)
+            {
+                <div style="position:relative;">
+                    <button type="button" class="secondary outline" onclick="var el=document.getElementById('feed-collection-picker-@Model.Id'); el.style.display = el.style.display === 'block' ? 'none' : 'block';" title="Save" style="margin: 0; padding: 0.5rem 0.75rem;">
+                        <span class="fas fa-bookmark"></span>
+                    </button>
+                    <div id="feed-collection-picker-@Model.Id" style="display:none; position:absolute; right:0; z-index:30; background:white; padding:0.5rem; border:1px solid #ddd; border-radius:0.25rem; min-width:200px;">
+                        @if (!userCollections.Any())
+                        {
+                            <div>
+                                <p>No collections yet.</p>
+                                <p><a asp-controller="Collections" asp-action="Create">Create one</a></p>
+                            </div>
+                        }
+                        else
+                        {
+                            <form asp-controller="Collections" asp-action="AddRecipe" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="recipeId" value="@Model.Id" />
+                                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                                <label>
+                                    Add to
+                                    <select name="collectionId" required style="width:100%; margin-top:0.25rem;">
+                                        <option value="">Choose...</option>
+                                        @foreach (var c in userCollections)
+                                        {
+                                            <option value="@c.Id">@c.Name</option>
+                                        }
+                                    </select>
+                                </label>
+                                <div style="margin-top:0.5rem; display:flex; gap:0.5rem; justify-content:flex-end;">
+                                    <button type="submit" class="button">Save</button>
+                                    <button type="button" class="secondary outline" onclick="document.getElementById('feed-collection-picker-@Model.Id').style.display='none'">Cancel</button>
+                                </div>
+                            </form>
+                        }
+                    </div>
+                </div>
+            }
         </div>
     </footer>
 </article>

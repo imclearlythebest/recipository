@@ -1,0 +1,30 @@
+@model Website.Models.ViewModels.CollectionCreateViewModel
+@{
+    ViewData["Title"] = "New Collection";
+}
+
+<main class="container">
+    <h1>Create Collection</h1>
+    <p>Create a named collection. A public share URL is generated for you after saving.</p>
+
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly"></div>
+
+        <label asp-for="Name">
+            Name
+            <input asp-for="Name" placeholder="Summer dinners" />
+        </label>
+        <span asp-validation-for="Name"></span>
+
+        <label asp-for="CoverPhotoUrl">
+            Cover Photo URL
+            <input asp-for="CoverPhotoUrl" placeholder="/images/collections/summer.jpg" />
+        </label>
+
+        <div class="grid" style="margin-top: 1.5rem;">
+            <button type="submit">Create Collection</button>
+            <button type="button" class="secondary outline" onclick="window.history.back()">Cancel</button>
+        </div>
+    </form>
+</main>

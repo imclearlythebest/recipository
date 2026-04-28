@@ -1,7 +1,7 @@
 @model VoteControlsViewModel
 
 <div id="vote-controls-@Model.ContentId" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-    <span style="font-weight: bold; min-width: 2rem; text-align: center;">@Model.Score</span>
+    <button type="button" class="secondary outline" style="margin: 0; padding: 0.5rem 0.75rem;" onclick="return false;">@Model.Score</button>
     @if (Model.CanVote)
     {
         <form asp-controller="Home" asp-action="Upvote" method="post" hx-post="@Url.Action("Upvote", "Home")" hx-target="#vote-controls-@Model.ContentId" hx-swap="outerHTML" style="margin: 0; padding: 0;">
