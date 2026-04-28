@@ -1,3 +1,7 @@
+@{
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+}
+
 <section>
   <nav>
     <ul>
@@ -7,8 +11,12 @@
             <span class="fas fa-plus"></span> Create
           </summary>
           <ul>
+            <li><a asp-controller="Ingredients" asp-action="Create">Ingredient</a></li>
+            @if (User.IsInRole("Admin"))
+            {
+              <li><a asp-controller="Ingredients" asp-action="CreateShopItem">Shop Item</a></li>
+            }
             <li><a href="#">Recipe</a></li>
-            <li><a href="#">Ingredient</a></li>
           </ul>
         </details>
       </li>
@@ -16,36 +24,39 @@
   </nav>
 </section>
 
-<form id="post-filter-form" hx-get="/Home/Filter" hx-target="#home-feed" hx-trigger="change, keyup delay:300ms changed">
-  <section>
-    <label for="post-search">Search Posts</label>
-    <input type="search" id="post-search" name="search" placeholder="Search recipes..." />
-  </section>
+@if (action == "Index")
+{
+  <form id="post-filter-form" hx-get="/Home/Filter" hx-target="#home-feed" hx-trigger="change, keyup delay:300ms changed">
+    <section>
+      <label for="post-search">Search Posts</label>
+      <input type="search" id="post-search" name="search" placeholder="Search recipes..." />
+    </section>
 
-  <section>
-    <h6>Sort By</h6>
-    <select name="sortBy">
-      <option value="newest">Newest</option>
-      <option value="top">Top Scored</option>
-      <option value="trending">Trending</option>
-    </select>
-  </section>
+    <section>
+      <h6>Sort By</h6>
+      <select name="sortBy">
+        <option value="newest">Newest</option>
+        <option value="top">Top Scored</option>
+        <option value="trending">Trending</option>
+      </select>
+    </section>
 
-  <section>
-    <h6>Time Period</h6>
-    <fieldset>
-      <label>
-        <input type="radio" name="time" value="all" checked>
-        All Time
-      </label>
-      <label>
-        <input type="radio" name="time" value="today">
-        Today
-      </label>
-      <label>
-        <input type="radio" name="time" value="week">
-        This Week
-      </label>
-    </fieldset>
-  </section>
-</form>
+    <section>
+      <h6>Time Period</h6>
+      <fieldset>
+        <label>
+          <input type="radio" name="time" value="all" checked>
+          All Time
+        </label>
+        <label>
+          <input type="radio" name="time" value="today">
+          Today
+        </label>
+        <label>
+          <input type="radio" name="time" value="week">
+          This Week
+        </label>
+      </fieldset>
+    </section>
+  </form>
+}
