@@ -33,16 +33,13 @@
     </section>
 
     <section>
-      <h6>Sort By</h6>
+      <h6>Filters</h6>
       <select name="sortBy">
         <option value="newest">Newest</option>
         <option value="top">Top Scored</option>
         <option value="trending">Trending</option>
       </select>
-    </section>
 
-    <section>
-      <h6>Time Period</h6>
       <fieldset>
         <label>
           <input type="radio" name="time" value="all" checked>
@@ -57,6 +54,14 @@
           This Week
         </label>
       </fieldset>
+
+      @if (User.Identity?.IsAuthenticated == true)
+      {
+        <label>
+          <input type="checkbox" id="feed-type-toggle" name="feedType" value="followers" onchange="this.value = this.checked ? 'followers' : 'global'; htmx.trigger('#post-filter-form', 'change');" role="switch" />
+          Following Only
+        </label>
+      }
     </section>
   </form>
 }
