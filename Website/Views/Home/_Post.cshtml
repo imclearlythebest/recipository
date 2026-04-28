@@ -5,6 +5,7 @@
 @{
     var currentUser = await UserManager.GetUserAsync(User);
     var userVote = Model.Votes.FirstOrDefault(v => v.ApplicationUserId == currentUser?.Id);
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
 }
 
 <article>
@@ -16,29 +17,24 @@
         </a>
     </header>
     <p>@Model.MainText</p>
-    <time datetime="@Model.CreatedAt">@Model.CreatedAt</time>
+    <time datetime="@Model.CreatedAt.ToUniversalTime():O">@Model.CreatedAt.ToLocalTime()</time>
     <footer>
-        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-            <span style="font-weight: bold; min-width: 2rem; text-align: center;">@Model.Score</span>
-            @if (currentUser != null)
-            {
-                <form asp-controller="Home" asp-action="Upvote" asp-route-contentId="@Model.Id" method="post" style="margin: 0; padding: 0;">
-                    <button type="submit" class="@(userVote?.VoteType == VoteType.Upvote ? "secondary" : "secondary outline")" style="margin: 0; padding: 0.5rem 0.75rem;">
-                        <span class="fas fa-arrow-up" />
-                    </button>
-                </form>
-                <form asp-controller="Home" asp-action="Downvote" asp-route-contentId="@Model.Id" method="post" style="margin: 0; padding: 0;">
-                    <button type="submit" class="@(userVote?.VoteType == VoteType.Downvote ? "secondary" : "secondary outline")" style="margin: 0; padding: 0.5rem 0.75rem;">
-                        <span class="fas fa-arrow-down" />
-                    </button>
-                </form>
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+            @{
+                var vc = new Website.Models.ViewModels.VoteControlsViewModel
+                {
+                    ContentId = Model.Id,
+                    Score = Model.Score,
+                    UserVote = userVote?.VoteType,
+                    CanVote = currentUser != null,
+                    ReturnUrl = returnUrl ?? string.Empty
+                };
             }
-            else
-            {
-                <button disabled class="secondary outline" style="margin: 0; padding: 0.5rem 0.75rem;"><span class="fas fa-arrow-up" /></button>
-                <button disabled class="secondary outline" style="margin: 0; padding: 0.5rem 0.75rem;"><span class="fas fa-arrow-down" /></button>
-            }
-            <button class="secondary outline" style="margin: 0; padding: 0.5rem 0.75rem;"><span class="fas fa-comment" /></button>
+            @await Html.PartialAsync("_VoteControls", vc)
+            <a asp-controller="Home" asp-action="Post" asp-route-id="@Model.Id" class="secondary outline" title="Comments" style="margin: 0; padding: 0.5rem 0.75rem;">
+                <span class="fas fa-comment"></span>
+            </a>
         </div>
     </footer>
 </article>
+

@@ -1,0 +1,57 @@
+@model Recipe
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var currentUser = await UserManager.GetUserAsync(User);
+    var userVote = Model.Votes.FirstOrDefault(v => v.ApplicationUserId == currentUser?.Id);
+    var voteReturnUrl = Url.Action("Post", "Home", new { id = Model.Id });
+    ViewData["Title"] = Model.Title;
+}
+
+<p><a asp-controller="Home" asp-action="Index">← Back</a></p>
+
+<article>
+    <header>
+        <strong>@Model.Title</strong>
+        <br />
+        <a asp-controller="User" asp-action="Profile" asp-route-username="@Model.Author.UserName">
+            <small>- @Model.Author.DisplayName</small>
+        </a>
+    </header>
+    <p>@Model.MainText</p>
+    <time datetime="@Model.CreatedAt.ToUniversalTime():O">@Model.CreatedAt.ToLocalTime()</time>
+    <footer>
+        @{
+            var vc = new Website.Models.ViewModels.VoteControlsViewModel
+            {
+                ContentId = Model.Id,
+                Score = Model.Score,
+                UserVote = userVote?.VoteType,
+                CanVote = currentUser != null,
+                ReturnUrl = voteReturnUrl ?? string.Empty
+            };
+        }
+        @await Html.PartialAsync("_VoteControls", vc)
+    </footer>
+</article>
+
+<h3>Comments (@Model.Replies.Count)</h3>
+
+<div id="comments-@Model.Id">
+    @if (currentUser != null)
+    {
+        <article>
+            <form asp-controller="Content" asp-action="AddComment" asp-route-recipeId="@Model.Id" method="post" hx-post="@Url.Action("AddComment", "Content")" hx-target="#comments-@Model.Id" hx-swap="innerHTML">
+                <input type="hidden" name="recipeId" value="@Model.Id" />
+                <label for="comment-text">
+                    Add a Comment
+                    <textarea id="comment-text" name="text" placeholder="What do you think?" required rows="3"></textarea>
+                </label>
+                <button type="submit">Post Comment</button>
+            </form>
+        </article>
+    }
+
+    <partial name="_CommentsList" model="Model.Replies.OrderByDescending(c => c.CreatedAt).ToList()" />
+</div>

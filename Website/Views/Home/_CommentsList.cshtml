@@ -1,0 +1,50 @@
+@model List<Website.Models.Content>
+@using Microsoft.AspNetCore.Identity
+@using Website.Models.ViewModels
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var currentUser = await UserManager.GetUserAsync(User);
+}
+
+@if (!Model.Any())
+{
+    <p>No comments yet. Be the first to comment!</p>
+}
+else
+{
+    @foreach (var comment in Model)
+    {
+        var vc = new VoteControlsViewModel
+        {
+            ContentId = comment.Id,
+            Score = comment.Score,
+            UserVote = comment.Votes.FirstOrDefault(v => v.ApplicationUserId == currentUser?.Id)?.VoteType,
+            CanVote = currentUser != null,
+            ReturnUrl = Url.Action("Post", "Home", new { id = comment.ParentId }) ?? string.Empty
+        };
+        <article>
+            <header>
+                <a asp-controller="User" asp-action="Profile" asp-route-username="@comment.Author.UserName">
+                    <strong>@comment.Author.DisplayName</strong>
+                </a>
+                <time datetime="@comment.CreatedAt.ToUniversalTime():O">@comment.CreatedAt.ToLocalTime().ToString("g")</time>
+            </header>
+            <p>@comment.MainText</p>
+            <footer style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+                @await Html.PartialAsync("_VoteControls", vc)
+                @if (comment.Replies.Any())
+                {
+                    <a asp-controller="Home" asp-action="Comment" asp-route-id="@comment.Id" class="secondary outline" style="margin:0;padding:0.35rem 0.5rem;">Replies (@comment.Replies.Count)</a>
+                }
+                @* Always show Reply link for logged-in users *@
+                @if (currentUser != null)
+                {
+                    <a asp-controller="Home" asp-action="Comment" asp-route-id="@comment.Id" class="secondary outline" style="margin:0;padding:0.35rem 0.5rem;" title="Reply" aria-label="Reply">
+                        <span class="fas fa-reply"></span>
+                    </a>
+                }
+            </footer>
+        </article>
+    }
+}
