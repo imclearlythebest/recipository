@@ -16,6 +16,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
   public DbSet<ContentVote> ContentVotes => Set<ContentVote>();
   public DbSet<Follow> Follows => Set<Follow>();
   public DbSet<Collection> Collections => Set<Collection>();
+  public DbSet<RecipeReviewRequest> RecipeReviewRequests => Set<RecipeReviewRequest>();
+  public DbSet<RecipeReview> RecipeReviews => Set<RecipeReview>();
   public DbSet<Order> Orders => Set<Order>();
   public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
@@ -92,6 +94,41 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(r => r.Collections)
             .UsingEntity(j => j.ToTable("CollectionRecipes"));
     });
+
+        modelBuilder.Entity<RecipeReviewRequest>(entity =>
+        {
+      entity.HasIndex(r => new { r.ApplicationUserId, r.RecipeId })
+        .IsUnique();
+
+      entity.HasOne(r => r.User)
+        .WithMany(u => u.ReviewRequests)
+        .HasForeignKey(r => r.ApplicationUserId)
+        .OnDelete(DeleteBehavior.Cascade);
+
+      entity.HasOne(r => r.Recipe)
+        .WithMany(r => r.ReviewRequests)
+        .HasForeignKey(r => r.RecipeId)
+        .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<RecipeReview>(entity =>
+        {
+      entity.HasIndex(r => new { r.ApplicationUserId, r.RecipeId })
+        .IsUnique();
+
+      entity.Property(r => r.Rating)
+        .HasDefaultValue(5);
+
+      entity.HasOne(r => r.User)
+        .WithMany(u => u.Reviews)
+        .HasForeignKey(r => r.ApplicationUserId)
+        .OnDelete(DeleteBehavior.Cascade);
+
+      entity.HasOne(r => r.Recipe)
+        .WithMany(r => r.Reviews)
+        .HasForeignKey(r => r.RecipeId)
+        .OnDelete(DeleteBehavior.Cascade);
+        });
 
     // --- MARKETPLACE & INGREDIENT SEED ---
     modelBuilder.Entity<ShopItem>().HasData(

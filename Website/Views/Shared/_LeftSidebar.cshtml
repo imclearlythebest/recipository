@@ -1,8 +1,21 @@
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@inject Website.Data.AppDbContext DbContext
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+	var currentUser = await UserManager.GetUserAsync(User);
+	var pendingReviewCount = currentUser == null
+		? 0
+		: await DbContext.RecipeReviewRequests.CountAsync(r => r.ApplicationUserId == currentUser.Id);
+}
+
 @if (User.Identity?.IsAuthenticated == true)
 {
 	<nav>
 		<ul>
 			<li><a asp-controller="Collections" asp-action="Index">Collections</a></li>
+			<li><a asp-controller="Home" asp-action="Reviews">Reviews (@pendingReviewCount)</a></li>
 		</ul>
 	</nav>
 }

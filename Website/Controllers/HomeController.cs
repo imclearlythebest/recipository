@@ -18,6 +18,8 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
         var query = _dbContext.Recipes
             .Include(r => r.Author)
             .Include(r => r.Votes)
+            .Include(r => r.Reviews)
+            .ThenInclude(rv => rv.User)
             .Include(r => r.Replies.OrderByDescending(c => c.CreatedAt))
             .ThenInclude(c => c.Author)
             .Include(r => r.Replies)
@@ -66,6 +68,8 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
             ViewData["UserCollections"] = new List<Collection>();
         }
 
+        ViewData["PendingRecipeReviews"] = LoadPendingRecipeReviews(currentUser?.Id);
+
         return View(recipes);
     }
 
@@ -82,6 +86,8 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
         var query = _dbContext.Recipes
             .Include(r => r.Author)
             .Include(r => r.Votes)
+            .Include(r => r.Reviews)
+            .ThenInclude(rv => rv.User)
             .Include(r => r.Replies.OrderByDescending(c => c.CreatedAt))
             .ThenInclude(c => c.Author)
             .Include(r => r.Replies)
@@ -117,8 +123,14 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
 
         query = sortBy switch
         {
+            "rating" => query.OrderByDescending(r => r.Reviews.Any() ? r.Reviews.Average(rv => rv.Rating) : 0)
+                              .ThenByDescending(r => r.Reviews.Count)
+                              .ThenByDescending(r => r.CreatedAt),
             "top" => query.OrderByDescending(r => r.Votes.Count(v => v.VoteType == VoteType.Upvote) - 
-                                                   r.Votes.Count(v => v.VoteType == VoteType.Downvote)),
+                                                   r.Votes.Count(v => v.VoteType == VoteType.Downvote))
+                           .ThenByDescending(r => r.Reviews.Any() ? r.Reviews.Average(rv => rv.Rating) : 0)
+                           .ThenByDescending(r => r.Reviews.Count)
+                           .ThenByDescending(r => r.CreatedAt),
             "trending" => query.OrderByDescending(r => r.Votes.Count())
                                .ThenByDescending(r => r.CreatedAt),
             _ => query.OrderByDescending(r => r.CreatedAt)
@@ -158,6 +170,8 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
             ViewData["UserCollections"] = new List<Collection>();
         }
 
+        ViewData["PendingRecipeReviews"] = LoadPendingRecipeReviews(currentUser?.Id);
+
         return PartialView("_HomeFeed", recipes);
     }
 
@@ -168,6 +182,8 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
         var recipe = await _dbContext.Recipes
             .Include(r => r.Author)
             .Include(r => r.Votes)
+            .Include(r => r.Reviews)
+            .ThenInclude(rv => rv.User)
             .Include(r => r.Replies.OrderByDescending(c => c.CreatedAt))
             .ThenInclude(c => c.Author)
             .Include(r => r.Replies)
@@ -208,7 +224,122 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
             ViewData["UserCollections"] = new List<Collection>();
         }
 
+        ViewData["PendingRecipeReviews"] = LoadPendingRecipeReviews(currentUser?.Id);
+
         return View(recipe);
+    }
+
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> SimulatePurchase(int recipeId, string? returnUrl = null)
+    {
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null) return Unauthorized();
+
+        var recipe = await _dbContext.Recipes.FindAsync(recipeId);
+        if (recipe == null) return NotFound();
+
+        var existingRequest = await _dbContext.RecipeReviewRequests
+            .FirstOrDefaultAsync(r => r.ApplicationUserId == currentUser.Id && r.RecipeId == recipeId);
+
+        if (existingRequest == null)
+        {
+            _dbContext.RecipeReviewRequests.Add(new RecipeReviewRequest
+            {
+                ApplicationUserId = currentUser.Id,
+                RecipeId = recipeId
+            });
+            await _dbContext.SaveChangesAsync();
+        }
+
+        if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+            return Redirect(returnUrl);
+
+        return RedirectToAction(nameof(Post), new { id = recipeId });
+    }
+
+    [Authorize]
+    public async Task<IActionResult> Review(int id)
+    {
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null) return Unauthorized();
+
+        var request = await _dbContext.RecipeReviewRequests
+            .Include(r => r.Recipe)
+            .ThenInclude(recipe => recipe!.Author)
+            .FirstOrDefaultAsync(r => r.Id == id && r.ApplicationUserId == currentUser.Id);
+
+        if (request == null) return NotFound();
+
+        return View(request);
+    }
+
+    [HttpPost]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Review(int id, int rating, string reviewText)
+    {
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null) return Unauthorized();
+
+        if (rating < 1 || rating > 5)
+        {
+            ModelState.AddModelError(nameof(rating), "Rating must be between 1 and 5 stars.");
+        }
+
+        var request = await _dbContext.RecipeReviewRequests
+            .Include(r => r.Recipe)
+            .FirstOrDefaultAsync(r => r.Id == id && r.ApplicationUserId == currentUser.Id);
+
+        if (request == null) return NotFound();
+
+        if (!ModelState.IsValid)
+        {
+            return View(request);
+        }
+
+        var existingReview = await _dbContext.RecipeReviews
+            .FirstOrDefaultAsync(r => r.ApplicationUserId == currentUser.Id && r.RecipeId == request.RecipeId);
+
+        if (existingReview == null)
+        {
+            _dbContext.RecipeReviews.Add(new RecipeReview
+            {
+                ApplicationUserId = currentUser.Id,
+                RecipeId = request.RecipeId,
+                Rating = rating,
+                ReviewText = reviewText,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+        else
+        {
+            existingReview.Rating = rating;
+            existingReview.ReviewText = reviewText;
+            existingReview.CreatedAt = DateTime.UtcNow;
+            _dbContext.RecipeReviews.Update(existingReview);
+        }
+
+        _dbContext.RecipeReviewRequests.Remove(request);
+        await _dbContext.SaveChangesAsync();
+
+        return RedirectToAction(nameof(Post), new { id = request.RecipeId });
+    }
+
+    [Authorize]
+    public async Task<IActionResult> Reviews()
+    {
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null) return Unauthorized();
+
+        var pendingReviews = await _dbContext.RecipeReviewRequests
+            .Include(r => r.Recipe)
+            .ThenInclude(recipe => recipe!.Author)
+            .Where(r => r.ApplicationUserId == currentUser.Id)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToListAsync();
+
+        return View(pendingReviews);
     }
 
     public async Task<IActionResult> Comment(int id)
@@ -351,6 +482,21 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
             CanVote = true,
             ReturnUrl = returnUrl ?? string.Empty
         };
+    }
+
+    private List<RecipeReviewRequest> LoadPendingRecipeReviews(string? currentUserId)
+    {
+        if (string.IsNullOrWhiteSpace(currentUserId))
+        {
+            return new List<RecipeReviewRequest>();
+        }
+
+        return _dbContext.RecipeReviewRequests
+            .Include(r => r.Recipe)
+            .ThenInclude(recipe => recipe!.Author)
+            .Where(r => r.ApplicationUserId == currentUserId)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToList();
     }
 
     public IActionResult About() => View();

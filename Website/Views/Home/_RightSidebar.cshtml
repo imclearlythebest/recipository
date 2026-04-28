@@ -1,5 +1,6 @@
 @{
     var action = ViewContext.RouteData.Values["action"]?.ToString();
+  var pendingReviews = ViewData["PendingRecipeReviews"] as List<RecipeReviewRequest> ?? new List<RecipeReviewRequest>();
 }
 
 <section>
@@ -37,6 +38,7 @@
       <select name="sortBy">
         <option value="newest">Newest</option>
         <option value="top">Top Scored</option>
+        <option value="rating">Top Rated</option>
         <option value="trending">Trending</option>
       </select>
 
@@ -64,4 +66,5 @@
       }
     </section>
   </form>
+
 }

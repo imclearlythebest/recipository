@@ -1,0 +1,33 @@
+@model List<Website.Models.RecipeReviewRequest>
+@{
+    ViewData["Title"] = "Pending Reviews";
+}
+
+<main class="container">
+    <h1>Pending Reviews</h1>
+    <p>Review the recipes you have queued from simulated purchases.</p>
+
+    @if (!Model.Any())
+    {
+        <article>
+            <p>You have no pending recipe reviews.</p>
+        </article>
+    }
+    else
+    {
+        <div class="card-grid">
+            @foreach (var request in Model)
+            {
+                <article>
+                    <header>
+                        <strong>@request.Recipe?.Title</strong>
+                        <br />
+                        <small>by @request.Recipe?.Author.DisplayName</small>
+                    </header>
+                    <p>Queued @request.CreatedAt.ToLocalTime().ToString("g")</p>
+                    <p><a asp-controller="Home" asp-action="Review" asp-route-id="@request.Id" role="button" class="secondary outline">Review now</a></p>
+                </article>
+            }
+        </div>
+    }
+</main>
