@@ -1,0 +1,46 @@
+@model Website.Models.RecipeReviewRequest
+@{
+    ViewData["Title"] = "Review Recipe";
+}
+
+<main class="container">
+    <h1>Review Recipe</h1>
+    <article>
+        <header>
+            <strong>@Model.Recipe?.Title</strong>
+            <br />
+            <small>by @Model.Recipe?.Author.DisplayName</small>
+        </header>
+
+        <section>
+            <h3>Write Review</h3>
+            <p>This review will appear on the recipe after submission.</p>
+        </section>
+
+        <form asp-action="Review" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+
+            <label>
+                Rating
+                <select name="rating" required>
+                    <option value="5">5 - Excellent</option>
+                    <option value="4">4 - Great</option>
+                    <option value="3">3 - Good</option>
+                    <option value="2">2 - Fair</option>
+                    <option value="1">1 - Poor</option>
+                </select>
+            </label>
+
+            <label>
+                Review
+                <textarea name="reviewText" rows="5" placeholder="Tell us what you thought..." required></textarea>
+            </label>
+
+            <div class="grid" style="margin-top: 1.5rem;">
+                <button type="submit">Submit Review</button>
+                <button type="button" class="secondary outline" onclick="window.location.href='@Url.Action("Post", "Home", new { id = Model.RecipeId })'">Cancel</button>
+            </div>
+        </form>
+    </article>
+</main>

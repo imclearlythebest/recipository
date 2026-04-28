@@ -6,6 +6,8 @@
     var currentUser = await UserManager.GetUserAsync(User);
     var userVote = Model.Votes.FirstOrDefault(v => v.ApplicationUserId == currentUser?.Id);
     var voteReturnUrl = Url.Action("Post", "Home", new { id = Model.Id });
+    var averageRating = Model.Reviews.Any() ? Model.Reviews.Average(r => r.Rating) : 0;
+    var reviewCount = Model.Reviews.Count;
     ViewData["Title"] = Model.Title;
 }
 
@@ -32,6 +34,12 @@
                     CanVote = currentUser != null,
                     ReturnUrl = voteReturnUrl ?? string.Empty
                 };
+            }
+            @if (reviewCount > 0)
+            {
+                <button type="button" class="secondary outline" style="margin: 0; padding: 0.5rem 0.75rem;" title="Average rating">
+                    <span class="fas fa-star"></span> @averageRating.ToString("0.0") (@reviewCount)
+                </button>
             }
             @await Html.PartialAsync("_VoteControls", vc)
             
@@ -68,9 +76,42 @@
                     </div>
                 </div>
             }
+
+            @if (currentUser != null)
+            {
+                <form asp-controller="Home" asp-action="SimulatePurchase" method="post" style="margin:0;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="recipeId" value="@Model.Id" />
+                    <input type="hidden" name="returnUrl" value="@Url.Action("Post", "Home", new { id = Model.Id })" />
+                    <button type="submit" class="secondary outline" title="Simulate purchase" style="margin: 0; padding: 0.5rem 0.75rem;">
+                        <span class="fas fa-basket-shopping"></span>
+                    </button>
+                </form>
+            }
         </div>
     </footer>
 </article>
+
+@if (reviewCount > 0)
+{
+    <section id="reviews">
+        <h3>Reviews</h3>
+        @foreach (var review in Model.Reviews.OrderByDescending(r => r.CreatedAt))
+        {
+            <article>
+                <header>
+                    <a asp-controller="User" asp-action="Profile" asp-route-username="@review.User?.UserName">
+                        <strong>@(review.User?.DisplayName ?? "Unknown user")</strong>
+                    </a>
+                    <br />
+                    <strong>@review.Rating / 5</strong>
+                    <small>@review.CreatedAt.ToLocalTime().ToString("g")</small>
+                </header>
+                <p>@review.ReviewText</p>
+            </article>
+        }
+    </section>
+}
 
 <h3>Comments (@Model.Replies.Count)</h3>
 
