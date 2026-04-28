@@ -2,32 +2,8 @@
 @{
   Layout = "_Layout";
   ViewData["Title"] = "Ingredients";
+  ViewData["LayoutType"] = "RightOnly";
 }
-<div class="grid card-grid">
-  @foreach (var ingredient in Model)
-  {
-    <article>
-      <header>
-        <nav>
-          <ul>
-            <li><strong>@ingredient.Name</strong></li>
-          </ul>
-          <ul>
-            <li><a data-tooltip="Edit"><span class="fas fa-file-pen"> </span></a></li>
-            <li><a data-tooltip="Convert to Shop Item"><span class="fas fa-file-import"> </span></a></li>
-          </ul>
-        </nav>
-      </header>
-      <img class="card-img" src="@ingredient.ImageUrl" alt="@ingredient.Name" />
-      <footer>
-        <details name="details">
-          <summary>Details</summary>
-          <ul>
-            <li>@ingredient.Description</li>
-            <li>Calories: @ingredient.Calories</li>
-          </ul>
-        </details>
-      </footer>
-    </article>
-  }
+<div id="ingredients-grid" class="card-grid">
+  <partial name="_IngredientsGrid" model="Model" />
 </div>

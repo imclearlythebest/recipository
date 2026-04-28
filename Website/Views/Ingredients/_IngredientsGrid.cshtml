@@ -1,0 +1,31 @@
+@model List<Ingredient>
+
+@foreach (var ingredient in Model)
+{
+    <article>
+        <header>
+        <nav>
+            <ul>
+            <li><strong>@ingredient.Name</strong></li>
+            </ul>
+            <ul>
+                        <li><a asp-controller="Ingredients" asp-action="Edit" asp-route-id="@ingredient.Id" data-tooltip="Edit"><span class="fas fa-file-pen"> </span></a></li>
+                        @if (User.IsInRole("Admin") && ingredient is not ShopItem)
+            {
+              <li><a asp-controller="Ingredients" asp-action="Convert" asp-route-id="@ingredient.Id" data-tooltip="Convert to Shop Item"><span class="fas fa-file-import"> </span></a></li>
+            }
+            </ul>
+        </nav>
+        </header>
+        <img class="card-img" src="@ingredient.ImageUrl" alt="@ingredient.Name" />
+        <footer>
+        <details name="details">
+            <summary>Details</summary>
+            <ul>
+            <li>@ingredient.Description</li>
+            <li>Calories: @ingredient.Calories</li>
+            </ul>
+        </details>
+        </footer>
+    </article>
+}
