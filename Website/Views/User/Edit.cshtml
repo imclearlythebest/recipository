@@ -1,0 +1,44 @@
+@model ApplicationUser
+
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<main class="container">
+    <hgroup>
+        <h1>Edit Profile</h1>
+        <p>Update your profile information</p>
+    </hgroup>
+
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <label for="DisplayName">
+            Display Name
+            <input type="text" asp-for="DisplayName" placeholder="Your display name" />
+        </label>
+
+        <label for="Bio">
+            Bio
+            <textarea asp-for="Bio" placeholder="Tell us about yourself..." rows="4"></textarea>
+        </label>
+
+        <label for="AvatarUrl">
+            Avatar URL
+            <input type="text" asp-for="AvatarUrl" placeholder="https://example.com/avatar.jpg" />
+        </label>
+
+        @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+        {
+            <div style="margin-bottom: 1rem;">
+                <label>Preview:</label>
+                <img src="@Model.AvatarUrl" alt="Avatar preview" class="avatar" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" />
+            </div>
+        }
+
+        <div class="grid" style="margin-top: 2rem;">
+            <button type="submit">Save Changes</button>
+            <button type="button" class="secondary outline" onclick="window.history.back()">Cancel</button>
+        </div>
+    </form>
+</main>
