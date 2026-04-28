@@ -35,14 +35,14 @@ else
                 @await Html.PartialAsync("_VoteControls", vc)
                 @if (comment.Replies.Any())
                 {
-                    <a asp-controller="Home" asp-action="Comment" asp-route-id="@comment.Id" class="secondary outline" style="margin:0;padding:0.35rem 0.5rem;">Replies (@comment.Replies.Count)</a>
+                    <button type="button" class="button secondary outline" onclick="window.location.href='@Url.Action("Comment", "Home", new { id = comment.Id })'" style="margin:0;padding:0.5rem 0.75rem;">Replies (@comment.Replies.Count)</button>
                 }
                 @* Always show Reply link for logged-in users *@
                 @if (currentUser != null)
                 {
-                    <a asp-controller="Home" asp-action="Comment" asp-route-id="@comment.Id" class="secondary outline" style="margin:0;padding:0.35rem 0.5rem;" title="Reply" aria-label="Reply">
+                    <button type="button" class="button secondary outline" onclick="window.location.href='@Url.Action("Comment", "Home", new { id = comment.Id })'" title="Reply" aria-label="Reply" style="margin:0;padding:0.5rem 0.75rem;">
                         <span class="fas fa-reply"></span>
-                    </a>
+                    </button>
                 }
             </footer>
         </article>

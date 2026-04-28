@@ -22,17 +22,53 @@
     <p>@Model.MainText</p>
     <time datetime="@Model.CreatedAt.ToUniversalTime():O">@Model.CreatedAt.ToLocalTime()</time>
     <footer>
-        @{
-            var vc = new Website.Models.ViewModels.VoteControlsViewModel
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+            @{
+                var vc = new Website.Models.ViewModels.VoteControlsViewModel
+                {
+                    ContentId = Model.Id,
+                    Score = Model.Score,
+                    UserVote = userVote?.VoteType,
+                    CanVote = currentUser != null,
+                    ReturnUrl = voteReturnUrl ?? string.Empty
+                };
+            }
+            @await Html.PartialAsync("_VoteControls", vc)
+            
+            @* Save to Collection button *@
+            @{
+                var userCollections = ViewData["UserCollections"] as List<Collection> ?? new List<Collection>();
+            }
+            @if (currentUser != null && userCollections.Any())
             {
-                ContentId = Model.Id,
-                Score = Model.Score,
-                UserVote = userVote?.VoteType,
-                CanVote = currentUser != null,
-                ReturnUrl = voteReturnUrl ?? string.Empty
-            };
-        }
-        @await Html.PartialAsync("_VoteControls", vc)
+                <div style="position:relative;">
+                    <button type="button" class="secondary outline" onclick="var el=document.getElementById('expanded-collection-picker-@Model.Id'); el.style.display = el.style.display === 'block' ? 'none' : 'block';" title="Save to collection" style="margin: 0; padding: 0.5rem 0.75rem;">
+                        <span class="fas fa-bookmark"></span>
+                    </button>
+                    <div id="expanded-collection-picker-@Model.Id" style="display:none; position:absolute; right:0; z-index:30; background:white; padding:0.5rem; border:1px solid #ddd; border-radius:0.25rem; min-width:200px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+                        <form asp-controller="Collections" asp-action="AddRecipe" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="recipeId" value="@Model.Id" />
+                            <input type="hidden" name="returnUrl" value="@Url.Action("Post", "Home", new { id = Model.Id })" />
+                            <label>
+                                Add to
+                                <select name="collectionId" required style="width:100%; margin-top:0.25rem;">
+                                    <option value="">Choose...</option>
+                                    @foreach (var c in userCollections)
+                                    {
+                                        <option value="@c.Id">@c.Name</option>
+                                    }
+                                </select>
+                            </label>
+                            <div style="margin-top:0.5rem; display:flex; gap:0.5rem; justify-content:flex-end;">
+                                <button type="submit" class="button">Save</button>
+                                <button type="button" class="secondary outline" onclick="document.getElementById('expanded-collection-picker-@Model.Id').style.display='none'">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
     </footer>
 </article>
 
@@ -57,3 +93,5 @@
         <partial name="_CommentsList" model="Model.Replies.OrderByDescending(c => c.CreatedAt).ToList()" />
     </div>
 </div>
+
+

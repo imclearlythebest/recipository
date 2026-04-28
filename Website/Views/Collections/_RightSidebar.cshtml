@@ -1,0 +1,25 @@
+@{
+    var publicShareUrl = ViewData["PublicShareUrl"]?.ToString();
+    var isPublicView = (bool)(ViewData["IsPublicView"] ?? false);
+    var collectionId = ViewData["CollectionId"] as int?;
+}
+
+@* Only show share/edit controls if viewing a collection details page *@
+@if (!string.IsNullOrWhiteSpace(publicShareUrl) || (!isPublicView && collectionId.HasValue))
+{
+    <section>
+        <h4>Collection</h4>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;">
+            @if (!string.IsNullOrWhiteSpace(publicShareUrl))
+            {
+                <button type="button" id="copy-public-link" class="button" style="width:100%;" onclick="navigator.clipboard.writeText('@publicShareUrl').then(()=>{ document.getElementById('copy-public-link').innerText = 'Copied'; }).catch(()=>alert('Unable to copy'))">Copy public link</button>
+            }
+            @if (!isPublicView && collectionId.HasValue)
+            {
+                <form asp-controller="Collections" asp-action="Edit" asp-route-id="@collectionId" style="margin:0;">
+                    <button type="submit" class="button" style="width:100%;">Edit Collection</button>
+                </form>
+            }
+        </div>
+    </section>
+}

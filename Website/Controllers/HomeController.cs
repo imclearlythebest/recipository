@@ -23,6 +23,39 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
             .ThenInclude(c => c.Votes)
             .OrderByDescending(r => r.CreatedAt)
             .ToList();
+        // populate user collections for feed picker
+        var currentUser = _userManager.GetUserAsync(User).GetAwaiter().GetResult();
+        if (currentUser != null)
+        {
+            var userCollections = _dbContext.Collections
+                .Where(c => c.ApplicationUserId == currentUser.Id)
+                .OrderBy(c => c.Name)
+                .ToList();
+
+            if (!userCollections.Any())
+            {
+                var defaultCollection = new Collection
+                {
+                    ApplicationUserId = currentUser.Id,
+                    Name = "My Recipes",
+                    PublicUrl = Guid.NewGuid().ToString("N")
+                };
+                _dbContext.Collections.Add(defaultCollection);
+                _dbContext.SaveChanges();
+
+                userCollections = _dbContext.Collections
+                    .Where(c => c.ApplicationUserId == currentUser.Id)
+                    .OrderBy(c => c.Name)
+                    .ToList();
+            }
+
+            ViewData["UserCollections"] = userCollections;
+        }
+        else
+        {
+            ViewData["UserCollections"] = new List<Collection>();
+        }
+
         return View(recipes);
     }
 
@@ -65,11 +98,47 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
         };
 
         var recipes = query.ToList();
+
+        // populate user collections for feed picker (partial requests)
+        var currentUser = _userManager.GetUserAsync(User).GetAwaiter().GetResult();
+        if (currentUser != null)
+        {
+            var userCollections = _dbContext.Collections
+                .Where(c => c.ApplicationUserId == currentUser.Id)
+                .OrderBy(c => c.Name)
+                .ToList();
+
+            if (!userCollections.Any())
+            {
+                var defaultCollection = new Collection
+                {
+                    ApplicationUserId = currentUser.Id,
+                    Name = "My Recipes",
+                    PublicUrl = Guid.NewGuid().ToString("N")
+                };
+                _dbContext.Collections.Add(defaultCollection);
+                _dbContext.SaveChanges();
+
+                userCollections = _dbContext.Collections
+                    .Where(c => c.ApplicationUserId == currentUser.Id)
+                    .OrderBy(c => c.Name)
+                    .ToList();
+            }
+
+            ViewData["UserCollections"] = userCollections;
+        }
+        else
+        {
+            ViewData["UserCollections"] = new List<Collection>();
+        }
+
         return PartialView("_HomeFeed", recipes);
     }
 
     public async Task<IActionResult> Post(int id)
     {
+        var currentUser = await _userManager.GetUserAsync(User);
+
         var recipe = await _dbContext.Recipes
             .Include(r => r.Author)
             .Include(r => r.Votes)
@@ -80,6 +149,38 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
             .FirstOrDefaultAsync(r => r.Id == id);
 
         if (recipe == null) return NotFound();
+
+        if (currentUser != null)
+        {
+            var userCollections = await _dbContext.Collections
+                .Where(c => c.ApplicationUserId == currentUser.Id)
+                .OrderBy(c => c.Name)
+                .ToListAsync();
+
+            if (!userCollections.Any())
+            {
+                // ensure everyone has a default collection
+                var defaultCollection = new Collection
+                {
+                    ApplicationUserId = currentUser.Id,
+                    Name = "My Recipes",
+                    PublicUrl = Guid.NewGuid().ToString("N")
+                };
+                _dbContext.Collections.Add(defaultCollection);
+                await _dbContext.SaveChangesAsync();
+
+                userCollections = await _dbContext.Collections
+                    .Where(c => c.ApplicationUserId == currentUser.Id)
+                    .OrderBy(c => c.Name)
+                    .ToListAsync();
+            }
+
+            ViewData["UserCollections"] = userCollections;
+        }
+        else
+        {
+            ViewData["UserCollections"] = new List<Collection>();
+        }
 
         return View(recipe);
     }

@@ -80,6 +80,9 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
 
     modelBuilder.Entity<Collection>(entity =>
     {
+      entity.HasIndex(c => c.PublicUrl)
+        .IsUnique();
+
       entity.HasOne(c => c.User)
             .WithMany(u => u.Collections)
             .HasForeignKey(c => c.ApplicationUserId)
