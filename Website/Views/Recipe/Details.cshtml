@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = Model.Title;
+    var shopItems = ViewBag.ShopItems as Dictionary<int, float> ?? new Dictionary<int, float>();
 }
 
 <article>
@@ -27,6 +28,9 @@
             </div>
         </div>
     </header>
+
+    @* Target for cart feedback *@
+    <div id="cart-toast"></div>
 
     <div class="grid" style="margin-bottom: 2rem;">
         <div>
@@ -54,9 +58,22 @@
             <ul>
                 @foreach (var ing in Model.Ingredients)
                 {
-                    <li>
-                        <strong>@ing.IngredientName</strong>: @ing.Quantity @ing.Unit 
-                        <small class="text-muted">(@Math.Round(ing.TotalCalories) cal)</small>
+                    <li style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <span>
+                            <strong>@ing.IngredientName</strong>: @ing.Quantity @ing.Unit 
+                            <small class="text-muted">(@Math.Round(ing.TotalCalories) cal)</small>
+                        </span>
+                        
+                        @if (shopItems.ContainsKey(ing.IngredientId))
+                        {
+                            <button class="outline primary" 
+                                    style="padding: 2px 8px; margin: 0; font-size: 0.8rem; width: auto;"
+                                    hx-post="/Cart/AddToCart/@ing.IngredientId?recipeId=@Model.Id"
+                                    hx-swap="none"
+                                    title="Add to Cart - $@shopItems[ing.IngredientId].ToString("F2")">
+                                <i class="fa-solid fa-cart-plus"></i>
+                            </button>
+                        }
                     </li>
                 }
             </ul>
@@ -75,8 +92,10 @@
     {
         <footer>
             <div class="grid">
-                <button class="outline primary">Edit Recipe</button>
-                <button class="outline contrast">Submit for Approval</button>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="button outline primary">Edit Recipe</a>
+                <form asp-action="Submit" asp-route-id="@Model.Id" method="post" style="margin:0;">
+                    <button type="submit" class="outline contrast">Submit for Approval</button>
+                </form>
             </div>
         </footer>
     }

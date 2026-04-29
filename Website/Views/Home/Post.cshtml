@@ -22,74 +22,108 @@
         </a>
     </header>
     <div id="cart-toast"></div>
-    <p>@Model.MainText</p>
     
-    @if (Model.Ingredients.Any())
-    {
+    <div class="grid" style="margin-bottom: 2rem;">
+        <div>
+            <strong>⏱️ Prep:</strong> @Model.PrepTime min
+        </div>
+        <div>
+            <strong>🔥 Cook:</strong> @Model.CookTime min
+        </div>
+        <div>
+            <strong>👥 Serves:</strong> @Model.ServingSize
+        </div>
+        <div>
+            <strong>⭐ Difficulty:</strong> @Model.Difficulty
+        </div>
+    </div>
+
+    <section>
+        <h3>Overview</h3>
+        <p>@Model.MainText</p>
+    </section>
+
+    <div class="grid">
         <section id="ingredients">
             <h3>Ingredients</h3>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <p style="margin: 0;">This recipe requires @Model.Ingredients.Count ingredients.</p>
-                @if (User.Identity?.IsAuthenticated == true)
-                {
-                    <button class="primary" 
-                            style="margin: 0;"
-                            hx-post="/Cart/AddRecipeIngredientsToCart?recipeId=@Model.Id" 
-                            hx-swap="none">
-                        Add All to Cart
-                    </button>
-                }
-                else
-                {
-                    <a href="/Auth/Login?ReturnUrl=@Context.Request.Path" class="button primary" style="margin: 0;">Login to Buy All</a>
-                }
-            </div>
-            <table role="grid">
-                <thead>
-                    <tr>
-                        <th>Ingredient</th>
-                        <th>Type</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var ingredient in Model.Ingredients)
+            @if (Model.Ingredients.Any())
+            {
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <p style="margin: 0;">This recipe requires @Model.Ingredients.Count ingredients.</p>
+                    @if (User.Identity?.IsAuthenticated == true)
                     {
+                        <button class="primary" 
+                                style="margin: 0;"
+                                hx-post="/Cart/AddRecipeIngredientsToCart?recipeId=@Model.Id" 
+                                hx-swap="none">
+                            Add All to Cart
+                        </button>
+                    }
+                    else
+                    {
+                        <a href="/Auth/Login?ReturnUrl=@Context.Request.Path" class="button primary" style="margin: 0;">Login to Buy All</a>
+                    }
+                </div>
+                <table role="grid">
+                    <thead>
                         <tr>
-                            <td>@ingredient.Name</td>
-                            <td>@ingredient.Type</td>
-                            <td>
-                                @if (ingredient is ShopItem shopItem)
-                                {
-                                    @if (User.Identity?.IsAuthenticated == true)
+                            <th>Ingredient</th>
+                            <th>Type</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ingredient in Model.Ingredients)
+                        {
+                            <tr>
+                                <td>@ingredient.Name</td>
+                                <td>@ingredient.Type</td>
+                                <td>
+                                    @if (ingredient is ShopItem shopItem)
                                     {
-                                        <button class="outline secondary" 
-                                                style="padding: 4px 8px; margin: 0; font-size: 0.8rem;"
-                                                hx-post="/Cart/AddToCart/@shopItem.Id" 
-                                                hx-swap="none">
-                                            Add ($@shopItem.Price.ToString("F2"))
-                                        </button>
+                                        @if (User.Identity?.IsAuthenticated == true)
+                                        {
+                                            <button class="outline secondary" 
+                                                    style="padding: 4px 8px; margin: 0; font-size: 0.8rem;"
+                                                    hx-post="/Cart/AddToCart/@shopItem.Id?recipeId=@Model.Id" 
+                                                    hx-swap="none">
+                                                Add ($@shopItem.Price.ToString("F2"))
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <a href="/Auth/Login?ReturnUrl=@Context.Request.Path" 
+                                               class="button outline secondary" 
+                                               style="padding: 4px 8px; margin: 0; font-size: 0.8rem; text-decoration: none; display: inline-block;">
+                                                Login to Buy
+                                            </a>
+                                        }
                                     }
                                     else
                                     {
-                                        <a href="/Auth/Login?ReturnUrl=@Context.Request.Path" 
-                                           class="button outline secondary" 
-                                           style="padding: 4px 8px; margin: 0; font-size: 0.8rem; text-decoration: none; display: inline-block;">
-                                            Login to Buy
-                                        </a>
+                                        <small>Not in shop</small>
                                     }
-                                }
-                                else
-                                {
-                                    <small>Not in shop</small>
-                                }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p>No ingredients listed.</p>
+            }
+
+            <div class="alert info" style="background: var(--pico-card-background-color); padding: 1rem; border-radius: var(--pico-border-radius); margin-top: 1rem;">
+                <strong>Total Estimated Calories:</strong> @Math.Round(Model.EstimatedCalories) cal
+            </div>
         </section>
-    }
+
+        <section>
+            <h3>Instructions</h3>
+            <div style="white-space: pre-wrap;">@Model.Instructions</div>
+        </section>
+    </div>
 
     <time datetime="@Model.CreatedAt.ToUniversalTime():O">@Model.CreatedAt.ToLocalTime()</time>
     <footer>

@@ -27,8 +27,15 @@
             <li><a asp-controller="Marketplace" asp-action="Index">Marketplace</a></li>
             <li><a asp-controller="Cart" asp-action="Index">Cart</a></li>
             
-            @* Feature 4: Functional Orders Link *@
             <li><a asp-controller="Order" asp-action="Index">Orders</a></li>
+            
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+              <li><hr /></li>
+              <li><strong>Recipe Management</strong></li>
+              <li><a asp-controller="Recipe" asp-action="Create">Create Recipe</a></li>
+              <li><a asp-controller="Recipe" asp-action="MyDrafts">My Drafts</a></li>
+            }
 
             @if (User.IsInRole("Admin"))
             {

@@ -1,0 +1,131 @@
+@model Website.Models.Dtos.RecipeResponseDto
+
+@{
+    ViewData["Title"] = "Review: " + Model.Title;
+    var history = ViewBag.History as List<Website.Models.Dtos.ApprovalHistoryDto> ?? new List<Website.Models.Dtos.ApprovalHistoryDto>();
+}
+
+<article>
+    <header>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h1 style="margin-bottom: 0;">Review: @Model.Title</h1>
+                <p class="text-muted">By <strong>@Model.AuthorName</strong> • Submitted on @Model.CreatedAt.ToShortDateString()</p>
+            </div>
+            <div>
+                <span class="badge warning">Pending Approval</span>
+            </div>
+        </div>
+    </header>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger" style="color: var(--pico-form-element-invalid-border-color); margin-bottom: 1rem;">
+            <i class="fa-solid fa-circle-exclamation"></i> @TempData["Error"]
+        </div>
+    }
+
+    <div class="grid" style="margin-bottom: 2rem;">
+        <div>
+            <strong>⏱️ Prep:</strong> @Model.PrepTime min
+        </div>
+        <div>
+            <strong>🔥 Cook:</strong> @Model.CookTime min
+        </div>
+        <div>
+            <strong>👥 Serves:</strong> @Model.ServingSize
+        </div>
+        <div>
+            <strong>⭐ Difficulty:</strong> @Model.Difficulty
+        </div>
+    </div>
+
+    <section>
+        <h3>Overview</h3>
+        <p>@Model.MainText</p>
+    </section>
+
+    <div class="grid">
+        <section>
+            <h3>Ingredients</h3>
+            <ul>
+                @foreach (var ing in Model.Ingredients)
+                {
+                    <li>
+                        <strong>@ing.IngredientName</strong>: @ing.Quantity @ing.Unit 
+                        <small class="text-muted">(@Math.Round(ing.TotalCalories) cal)</small>
+                    </li>
+                }
+            </ul>
+            <div style="background: var(--pico-card-background-color); padding: 1rem; border-radius: var(--pico-border-radius);">
+                <strong>Total Estimated Calories:</strong> @Math.Round(Model.EstimatedCalories) cal
+            </div>
+        </section>
+
+        <section>
+            <h3>Instructions</h3>
+            <div style="white-space: pre-wrap;">@Model.Instructions</div>
+        </section>
+    </div>
+
+    @if (history.Any())
+    {
+        <section style="margin-top: 2rem;">
+            <h3>Previous Review History</h3>
+            <table class="striped">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Admin</th>
+                        <th>Status</th>
+                        <th>Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in history)
+                    {
+                        <tr>
+                            <td>@entry.ReviewedAt.ToShortDateString()</td>
+                            <td>@entry.AdminName</td>
+                            <td>
+                                @if (entry.Status == "Approved")
+                                {
+                                    <span style="color: green;">@entry.Status</span>
+                                }
+                                else
+                                {
+                                    <span style="color: red;">@entry.Status</span>
+                                }
+                            </td>
+                            <td>@entry.Reason</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </section>
+    }
+
+    <footer style="margin-top: 2rem; border-top: 1px solid var(--pico-muted-border-color); padding-top: 2rem;">
+        <div class="grid">
+            <section>
+                <h4>Approve Recipe</h4>
+                <p>This will make the recipe public for all users.</p>
+                <form asp-action="Approve" asp-route-id="@Model.Id" method="post">
+                    <button type="submit" class="primary">Approve & Publish</button>
+                </form>
+            </section>
+
+            <section>
+                <h4>Reject Recipe</h4>
+                <p>Provide feedback to the author for revision.</p>
+                <form asp-action="Reject" asp-route-id="@Model.Id" method="post">
+                    <textarea name="reason" placeholder="Explain why the recipe is being rejected..." required minlength="10"></textarea>
+                    <button type="submit" class="outline contrast">Reject & Send Feedback</button>
+                </form>
+            </section>
+        </div>
+        <div style="text-align: center; margin-top: 2rem;">
+            <a asp-action="Index" class="outline secondary" role="button">Back to List</a>
+        </div>
+    </footer>
+</article>
