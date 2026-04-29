@@ -24,18 +24,20 @@
         <time datetime="@Model.CreatedAt.ToUniversalTime():O">@Model.CreatedAt.ToLocalTime().ToString("g")</time>
     </header>
     <p>@Model.MainText</p>
-    <footer>
-        @{
-            var vc = new Website.Models.ViewModels.VoteControlsViewModel
-            {
-                ContentId = Model.Id,
-                Score = Model.Score,
-                UserVote = userVote?.VoteType,
-                CanVote = currentUser != null,
-                ReturnUrl = voteReturnUrl ?? string.Empty
-            };
-        }
-        @await Html.PartialAsync("_VoteControls", vc)
+    <footer style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="display:flex;gap:0.5rem;align-items:center;">
+            @{
+                var vc = new Website.Models.ViewModels.VoteControlsViewModel
+                {
+                    ContentId = Model.Id,
+                    Score = Model.Score,
+                    UserVote = userVote?.VoteType,
+                    CanVote = currentUser != null,
+                    ReturnUrl = voteReturnUrl ?? string.Empty
+                };
+            }
+            @await Html.PartialAsync("_VoteControls", vc)
+        </div>
     </footer>
 </article>
 

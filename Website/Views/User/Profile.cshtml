@@ -18,7 +18,8 @@
     @if (isOwnProfile)
     {
         <div class="grid" style="margin-top: 1rem;">
-            <a asp-controller="User" asp-action="Edit" class="button">Edit Profile</a>
+            <a asp-controller="User" asp-action="Edit" class="primary" role="button">Edit Profile</a>
+            <a asp-controller="Auth" asp-action="Logout" class="outline contrast" role="button">Logout</a>
         </div>
     }
     else if (isLoggedIn)

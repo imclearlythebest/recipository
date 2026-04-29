@@ -26,17 +26,17 @@
                     @if (currentUser != null)
                     {
                         <form asp-controller="Home" asp-action="Upvote" asp-route-contentId="@comment.Id" method="post" style="margin: 0; padding: 0;">
-                            <button type="submit" class="secondary outline" style="margin: 0; padding: 0.4rem 0.6rem; font-size: 0.85rem;">
+                            <button type="submit" style="margin: 0; padding: 0.4rem 0.6rem; font-size: 0.85rem; background: none; border: none; color: inherit; cursor: pointer;">
                                 <span class="fas fa-arrow-up" />
                             </button>
                         </form>
                         <form asp-controller="Home" asp-action="Downvote" asp-route-contentId="@comment.Id" method="post" style="margin: 0; padding: 0;">
-                            <button type="submit" class="secondary outline" style="margin: 0; padding: 0.4rem 0.6rem; font-size: 0.85rem;">
+                            <button type="submit" style="margin: 0; padding: 0.4rem 0.6rem; font-size: 0.85rem; background: none; border: none; color: inherit; cursor: pointer;">
                                 <span class="fas fa-arrow-down" />
                             </button>
                         </form>
                     }
-                    <button class="secondary outline" style="margin: 0; padding: 0.4rem 0.6rem; font-size: 0.85rem;" onclick="document.getElementById('reply-form-@comment.Id').style.display = 'block'">
+                    <button style="margin: 0; padding: 0.4rem 0.6rem; font-size: 0.85rem; background: none; border: none; color: inherit; cursor: pointer;" onclick="document.getElementById('reply-form-@comment.Id').style.display = 'block'">
                         <span class="fas fa-reply" /> Reply
                     </button>
                 </div>
@@ -47,8 +47,8 @@
                         <form asp-controller="Content" asp-action="AddReply" asp-route-parentId="@comment.Id" method="post">
                             <textarea name="text" placeholder="Write a reply..." style="margin-bottom: 0.5rem; font-size: 0.9rem;" rows="2" required></textarea>
                             <div style="display: flex; gap: 0.5rem;">
-                                <button type="submit" class="secondary" style="font-size: 0.85rem;">Reply</button>
-                                <button type="button" class="secondary outline" style="font-size: 0.85rem;" onclick="document.getElementById('reply-form-@comment.Id').style.display = 'none'">Cancel</button>
+                                <button type="submit" class="button" style="font-size: 0.85rem;">Reply</button>
+                                <button type="button" style="font-size: 0.85rem; background: none; border: none; color: inherit; cursor: pointer; padding: 0.5rem 0.75rem;" onclick="document.getElementById('reply-form-@comment.Id').style.display = 'none'">Cancel</button>
                             </div>
                         </form>
                     </div>
