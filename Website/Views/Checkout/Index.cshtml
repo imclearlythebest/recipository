@@ -21,9 +21,9 @@
         {
           <tr>
             <td><strong>@item.Product?.Name</strong></td>
-            <td>$@item.Product?.Price.ToString("F2")</td>
+            <td>৳@item.Product?.Price.ToString("F2") <small style="font-weight: normal; color: var(--pico-muted-color);">@item.Product?.UnitName</small></td>
             <td>@item.Quantity</td>
-            <td>$@item.Subtotal.ToString("F2")</td>
+            <td>৳@item.Subtotal.ToString("F2")</td>
           </tr>
         }
       </tbody>
@@ -33,14 +33,14 @@
       <div style="display: inline-block; min-width: 250px;">
         <p style="margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
           <span>Subtotal:</span> 
-          <span>$@ViewBag.Subtotal.ToString("F2")</span>
+          <span>৳@ViewBag.Subtotal.ToString("F2")</span>
         </p>
         
         @if (ViewBag.Discount > 0)
         {
           <p style="color: var(--pico-del-color); margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
             <strong>Discount (10%):</strong> 
-            <strong>-$@ViewBag.Discount.ToString("F2")</strong>
+            <strong>-৳@ViewBag.Discount.ToString("F2")</strong>
           </p>
         }
 
@@ -48,14 +48,14 @@
 
         <h3 style="display: flex; justify-content: space-between;">
           <span>Total:</span> 
-          <span style="color: var(--pico-ins-color);">$@ViewBag.Total.ToString("F2")</span>
+          <span style="color: var(--pico-ins-color);">৳@ViewBag.Total.ToString("F2")</span>
         </h3>
       </div>
       
-      <div class="grid" style="margin-top: 2rem;">
-        <a href="/Cart" class="secondary outline" role="button">Edit Cart</a>
-        <form asp-controller="Checkout" asp-action="PlaceOrder" method="post" style="margin: 0;">
-          <button type="submit" class="primary" style="width: 100%;">
+      <div class="grid" style="margin-top: 2rem; align-items: stretch;">
+        <a href="/Cart" class="secondary outline" role="button" style="margin: 0; display: flex; align-items: center; justify-content: center;">Edit Cart</a>
+        <form asp-controller="Checkout" asp-action="PlaceOrder" method="post" style="margin: 0; display: flex; flex-direction: column;">
+          <button type="submit" class="primary" style="width: 100%; flex: 1; margin: 0;">
             Place Order
           </button>
         </form>

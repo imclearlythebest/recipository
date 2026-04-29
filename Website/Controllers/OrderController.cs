@@ -52,11 +52,39 @@ public class OrderController : Controller
   [Authorize(Roles = "Admin")]
   public async Task<IActionResult> UpdateStatus(int orderId, string status)
   {
-    var order = await _context.Orders.FindAsync(orderId);
+    var order = await _context.Orders
+        .Include(o => o.OrderItems)
+        .FirstOrDefaultAsync(o => o.Id == orderId);
     
     if (order != null)
     {
+      string oldStatus = order.Status;
       order.Status = status;
+
+      // If transition to Delivered, create review requests
+      if (oldStatus != "Delivered" && status == "Delivered")
+      {
+          var uniqueRecipeIds = order.OrderItems
+              .Where(oi => oi.RecipeId.HasValue)
+              .Select(oi => oi.RecipeId!.Value)
+              .Distinct();
+
+          foreach (var recipeId in uniqueRecipeIds)
+          {
+              var alreadyHasRequest = await _context.RecipeReviewRequests
+                  .AnyAsync(r => r.ApplicationUserId == order.UserId && r.RecipeId == recipeId);
+              
+              if (!alreadyHasRequest)
+              {
+                  _context.RecipeReviewRequests.Add(new RecipeReviewRequest
+                  {
+                      ApplicationUserId = order.UserId,
+                      RecipeId = recipeId
+                  });
+              }
+          }
+      }
+
       await _context.SaveChangesAsync();
     }
 

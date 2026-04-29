@@ -14,7 +14,7 @@
             </div>
             <div style="background: var(--pico-card-background-color); padding: 1.5rem; border-radius: var(--pico-border-radius); border: 2px solid var(--pico-primary-background); text-align: center;">
                 <small style="text-transform: uppercase; letter-spacing: 1px; color: var(--pico-muted-color);">Total Earnings</small>
-                <h2 style="margin: 0; color: var(--pico-primary-background);">$@totalRevenue.ToString("F2")</h2>
+                <h2 style="margin: 0; color: var(--pico-primary-background);">৳@totalRevenue.ToString("F2")</h2>
             </div>
         </div>
     </header>
@@ -48,8 +48,8 @@
                             <tr>
                                 <td>@tx.TransactionDate.ToShortDateString()</td>
                                 <td><strong>@tx.RecipeTitle</strong></td>
-                                <td>$@tx.TotalAmount.ToString("F2")</td>
-                                <td style="color: var(--pico-primary-background); font-weight: bold;">$@tx.AuthorShare.ToString("F2")</td>
+                                <td>৳@tx.TotalAmount.ToString("F2")</td>
+                                <td style="color: var(--pico-primary-background); font-weight: bold;">৳@tx.AuthorShare.ToString("F2")</td>
                                 <td>
                                     @if (tx.Status == "Completed")
                                     {
