@@ -21,7 +21,76 @@
             <small>- @Model.Author.DisplayName</small>
         </a>
     </header>
+    <div id="cart-toast"></div>
     <p>@Model.MainText</p>
+    
+    @if (Model.Ingredients.Any())
+    {
+        <section id="ingredients">
+            <h3>Ingredients</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <p style="margin: 0;">This recipe requires @Model.Ingredients.Count ingredients.</p>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <button class="primary" 
+                            style="margin: 0;"
+                            hx-post="/Cart/AddRecipeIngredientsToCart?recipeId=@Model.Id" 
+                            hx-swap="none">
+                        Add All to Cart
+                    </button>
+                }
+                else
+                {
+                    <a href="/Auth/Login?ReturnUrl=@Context.Request.Path" class="button primary" style="margin: 0;">Login to Buy All</a>
+                }
+            </div>
+            <table role="grid">
+                <thead>
+                    <tr>
+                        <th>Ingredient</th>
+                        <th>Type</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ingredient in Model.Ingredients)
+                    {
+                        <tr>
+                            <td>@ingredient.Name</td>
+                            <td>@ingredient.Type</td>
+                            <td>
+                                @if (ingredient is ShopItem shopItem)
+                                {
+                                    @if (User.Identity?.IsAuthenticated == true)
+                                    {
+                                        <button class="outline secondary" 
+                                                style="padding: 4px 8px; margin: 0; font-size: 0.8rem;"
+                                                hx-post="/Cart/AddToCart/@shopItem.Id" 
+                                                hx-swap="none">
+                                            Add ($@shopItem.Price.ToString("F2"))
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <a href="/Auth/Login?ReturnUrl=@Context.Request.Path" 
+                                           class="button outline secondary" 
+                                           style="padding: 4px 8px; margin: 0; font-size: 0.8rem; text-decoration: none; display: inline-block;">
+                                            Login to Buy
+                                        </a>
+                                    }
+                                }
+                                else
+                                {
+                                    <small>Not in shop</small>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </section>
+    }
+
     <time datetime="@Model.CreatedAt.ToUniversalTime():O">@Model.CreatedAt.ToLocalTime()</time>
     <footer>
         <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
@@ -43,6 +112,18 @@
             }
             @await Html.PartialAsync("_VoteControls", vc)
             
+            @if (currentUser != null)
+            {
+                <button type="button" 
+                        class="secondary outline" 
+                        title="Add ingredients to cart" 
+                        style="margin: 0; padding: 0.5rem 0.75rem;"
+                        hx-post="/Cart/AddRecipeIngredientsToCart?recipeId=@Model.Id" 
+                        hx-swap="none">
+                    <span class="fas fa-cart-plus"></span>
+                </button>
+            }
+
             @* Save to Collection button *@
             @{
                 var userCollections = ViewData["UserCollections"] as List<Collection> ?? new List<Collection>();

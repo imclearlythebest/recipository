@@ -2,7 +2,7 @@
 
 @foreach (var item in Model)
 {
-    bool isOutOfStock = item.Stock <= 0 || item.Price <= 0;
+    bool isOutOfStock = item.Stock <= 0;
 
     <article style="display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 0;">
     <header style="padding: 0;">

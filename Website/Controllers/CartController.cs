@@ -41,8 +41,8 @@ public class CartController : Controller
     
     if (item == null) return Content("Error: Item not found");
 
-    // Stock/Price Validation
-    if (item.Price <= 0 || item.Stock <= 0)
+    // Stock Validation
+    if (item.Stock <= 0)
     {
       return Content($@"
         <div id='cart-toast' hx-swap-oob='true' style='position:fixed; top:20px; right:20px; background:#e74c3c; color:white; padding:15px 25px; border-radius:8px; z-index:9999; box-shadow: 0 4px 12px rgba(0,0,0,0.1);'>
@@ -150,5 +150,65 @@ public class CartController : Controller
       .ToListAsync();
 
     return View("Index", updatedCart); 
+  }
+
+  [HttpPost]
+  public async Task<IActionResult> AddRecipeIngredientsToCart(int recipeId)
+  {
+    var userId = _userManager.GetUserId(User);
+    if (string.IsNullOrEmpty(userId)) return Challenge();
+
+    var recipe = await _context.Recipes
+        .Include(r => r.Ingredients)
+        .FirstOrDefaultAsync(r => r.Id == recipeId);
+
+    if (recipe == null) return Content("Error: Recipe not found");
+
+    var shopItems = recipe.Ingredients.OfType<ShopItem>().ToList();
+    if (!shopItems.Any())
+    {
+        return Content($@"
+          <div id='cart-toast' hx-swap-oob='true' style='position:fixed; top:20px; right:20px; background:#e74c3c; color:white; padding:15px 25px; border-radius:8px; z-index:9999; box-shadow: 0 4px 12px rgba(0,0,0,0.1);'>
+            <strong>Oops!</strong> This recipe has no buyable ingredients.
+          </div>");
+    }
+
+    int addedCount = 0;
+    foreach (var item in shopItems)
+    {
+        if (item.Stock > 0)
+        {
+            item.Stock -= 1;
+            var existing = await _context.CartItems
+                .FirstOrDefaultAsync(x => x.ShopItemId == item.Id && x.ApplicationUserId == userId);
+
+            if (existing != null) {
+                existing.Quantity += 1;
+            } else {
+                _context.CartItems.Add(new CartItem { 
+                    ShopItemId = item.Id, 
+                    ApplicationUserId = userId!, 
+                    Quantity = 1 
+                });
+            }
+            addedCount++;
+        }
+    }
+
+    if (addedCount > 0)
+    {
+        await _context.SaveChangesAsync();
+        return Content($@"
+          <div id='cart-toast' hx-swap-oob='true' style='position:fixed; top:20px; right:20px; background:#4CAF50; color:white; padding:15px 25px; border-radius:8px; z-index:9999; box-shadow: 0 4px 12px rgba(0,0,0,0.1);'>
+            <strong>Success!</strong> Added {addedCount} ingredients to cart.
+          </div>");
+    }
+    else
+    {
+        return Content($@"
+          <div id='cart-toast' hx-swap-oob='true' style='position:fixed; top:20px; right:20px; background:#e74c3c; color:white; padding:15px 25px; border-radius:8px; z-index:9999; box-shadow: 0 4px 12px rgba(0,0,0,0.1);'>
+            <strong>Stock Out!</strong> All ingredients in this recipe are out of stock.
+          </div>");
+    }
   }
 }

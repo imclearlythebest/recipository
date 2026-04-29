@@ -144,6 +144,13 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         .OnDelete(DeleteBehavior.Cascade);
         });
 
+    modelBuilder.Entity<Recipe>(entity =>
+    {
+      entity.HasMany(r => r.Ingredients)
+            .WithMany()
+            .UsingEntity(j => j.ToTable("RecipeIngredients"));
+    });
+
     // --- MARKETPLACE & INGREDIENT SEED ---
     modelBuilder.Entity<ShopItem>().HasData(
       new ShopItem { Id = 1, Name = "Tomato", Description = "Red, juicy fruit", ImageUrl = "/images/tomato.jpg", Calories = 20, Price = 0.00f, Stock = 100, Moq = 1, Increment = 1, Type=IngredientType.Vegetable },
