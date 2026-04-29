@@ -3,6 +3,7 @@ namespace Website.Models;
 public class Recipe : Content
 {
     public string Title { get; set; } = string.Empty;
+    public string? CoverImageUrl { get; set; }
     public string Instructions { get; set; } = string.Empty;
     public int PrepTime { get; set; }
     public int CookTime { get; set; }

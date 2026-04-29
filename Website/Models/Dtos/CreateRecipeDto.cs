@@ -9,6 +9,9 @@ public class CreateRecipeDto
         ErrorMessage = "Title must be between 5 and 200 characters")]
     public string Title { get; set; } = string.Empty;
     
+    [Url(ErrorMessage = "Please enter a valid URL")]
+    public string? CoverImageUrl { get; set; }
+    
     [Required(ErrorMessage = "Description is required")]
     [StringLength(2000, MinimumLength = 10,
         ErrorMessage = "Description must be between 10 and 2000 characters")]

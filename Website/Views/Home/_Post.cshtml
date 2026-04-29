@@ -8,109 +8,106 @@
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
     var averageRating = Model.Reviews.Any() ? Model.Reviews.Average(r => r.Rating) : 0;
     var reviewCount = Model.Reviews.Count;
+    var userCollections = ViewData["UserCollections"] as List<Collection> ?? new List<Collection>();
 }
 
-<article>
-    <header>
-        <strong>@Model.Title</strong>
-        <br />
-        <a asp-controller="User" asp-action="Profile" asp-route-username="@Model.Author.UserName">
-            <small>- @Model.Author.DisplayName</small>
+<article style="padding: 0;">
+    @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+    {
+        <a asp-controller="Home" asp-action="Post" asp-route-id="@Model.Id">
+            <img src="@Model.CoverImageUrl" alt="@Model.Title" style="width: 100%; height: 200px; object-fit: cover; transition: transform 0.3s ease-in-out; border-top-left-radius: var(--pico-border-radius); border-top-right-radius: var(--pico-border-radius);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" />
         </a>
+    }
+    <div style="padding: var(--pico-block-spacing-vertical) var(--pico-block-spacing-horizontal);">
+    <header style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; gap:1rem; border:none; padding:0; background:none;">
+        <div style="min-width:0; flex:1;">
+            <a asp-controller="Home" asp-action="Post" asp-route-id="@Model.Id" style="font-size:1.1rem; font-weight:bold; text-decoration:none; display:block;">
+                @Model.Title
+            </a>
+            <p class="text-muted" style="margin:0.25rem 0 0;">
+                By <a asp-controller="User" asp-action="Profile" asp-route-username="@Model.Author.UserName" style="color:inherit;">@Model.Author.DisplayName</a> • <small>@Model.CreatedAt.ToShortDateString()</small>
+            </p>
+        </div>
     </header>
     <p>@Model.MainText</p>
-    <time datetime="@Model.CreatedAt.ToUniversalTime():O">@Model.CreatedAt.ToLocalTime()</time>
     <footer>
-        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
-            @{
-                var vc = new Website.Models.ViewModels.VoteControlsViewModel
+        <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; justify-content:space-between;">
+            <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+                @{
+                    var vc = new Website.Models.ViewModels.VoteControlsViewModel
+                    {
+                        ContentId = Model.Id,
+                        Score = Model.Score,
+                        UserVote = userVote?.VoteType,
+                        CanVote = currentUser != null,
+                        ReturnUrl = returnUrl ?? string.Empty
+                    };
+                }
+                <span onclick="event.stopPropagation()">
+                    @await Html.PartialAsync("_VoteControls", vc)
+                </span>
+            </div>
+            <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+                @if (reviewCount > 0)
                 {
-                    ContentId = Model.Id,
-                    Score = Model.Score,
-                    UserVote = userVote?.VoteType,
-                    CanVote = currentUser != null,
-                    ReturnUrl = returnUrl ?? string.Empty
-                };
-            }
-            @if (reviewCount > 0)
-            {
-                <button type="button" class="secondary outline" style="margin: 0; padding: 0.5rem 0.75rem;" title="Average rating">
-                    <span class="fas fa-star"></span> @averageRating.ToString("0.0") (@reviewCount)
-                </button>
-            }
-            @await Html.PartialAsync("_VoteControls", vc)
-            <button type="button" class="secondary outline" onclick="window.location.href='@Url.Action("Post", "Home", new { id = Model.Id })'" title="Comments" style="margin: 0; padding: 0.5rem 0.75rem;">
-                <span class="fas fa-comment"></span>
-            </button>
-            <a asp-controller="Home" asp-action="Post" asp-route-id="@Model.Id" class="button outline primary" style="margin: 0; padding: 0.5rem 1rem;">View Recipe</a>
-
-            @if (currentUser != null)
-            {
-                <button type="button" 
-                        class="secondary outline" 
-                        title="Add ingredients to cart" 
-                        style="margin: 0; padding: 0.5rem 0.75rem;"
-                        hx-post="/Cart/AddRecipeIngredientsToCart?recipeId=@Model.Id" 
-                        hx-swap="none">
-                    <span class="fas fa-cart-plus"></span>
-                </button>
-            }
-
-            @* Save to Collection (feed) *@
-            @{
-                var userCollections = ViewData["UserCollections"] as List<Collection> ?? new List<Collection>();
-            }
-            @if (currentUser != null)
-            {
-                <div style="position:relative;">
-                    <button type="button" class="secondary outline" onclick="var el=document.getElementById('feed-collection-picker-@Model.Id'); el.style.display = el.style.display === 'block' ? 'none' : 'block';" title="Save" style="margin: 0; padding: 0.5rem 0.75rem;">
-                        <span class="fas fa-bookmark"></span>
-                    </button>
-                    <div id="feed-collection-picker-@Model.Id" style="display:none; position:absolute; right:0; z-index:30; background:white; padding:0.5rem; border:1px solid #ddd; border-radius:0.25rem; min-width:200px;">
-                        @if (!userCollections.Any())
-                        {
-                            <div>
-                                <p>No collections yet.</p>
-                                <p><a asp-controller="Collections" asp-action="Create">Create one</a></p>
-                            </div>
-                        }
-                        else
-                        {
-                            <form asp-controller="Collections" asp-action="AddRecipe" method="post">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="recipeId" value="@Model.Id" />
-                                <input type="hidden" name="returnUrl" value="@returnUrl" />
-                                <label>
-                                    Add to
-                                    <select name="collectionId" required style="width:100%; margin-top:0.25rem;">
-                                        <option value="">Choose...</option>
-                                        @foreach (var c in userCollections)
-                                        {
-                                            <option value="@c.Id">@c.Name</option>
-                                        }
-                                    </select>
-                                </label>
-                                <div style="margin-top:0.5rem; display:flex; gap:0.5rem; justify-content:flex-end;">
-                                    <button type="submit" class="button">Save</button>
-                                    <button type="button" class="secondary outline" onclick="document.getElementById('feed-collection-picker-@Model.Id').style.display='none'">Cancel</button>
-                                </div>
-                            </form>
-                        }
-                    </div>
-                </div>
-            }
-
-            @if (currentUser != null)
-            {
-                <form asp-controller="Home" asp-action="SimulatePurchase" method="post" style="margin:0;">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="recipeId" value="@Model.Id" />
-                    <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" />
-                    <button type="submit" class="secondary outline" title="Simulate purchase" style="margin: 0; padding: 0.5rem 0.75rem;">
+                    <a asp-controller="Home" asp-action="Post" asp-route-id="@Model.Id" title="Average rating" style="margin: 0; padding: 0.5rem 0.75rem; color: var(--pico-form-element-valid-border-color); text-decoration: none; cursor: pointer;">
+                        <span class="fas fa-star"></span> @averageRating.ToString("0.0") (@reviewCount)
+                    </a>
+                }
+                <a asp-controller="Home" asp-action="Post" asp-route-id="@Model.Id" title="Comments" style="margin: 0; padding: 0.5rem 0.75rem; color: inherit; text-decoration: none; cursor: pointer;">
+                    <span class="fas fa-comment"></span>
+                </a>
+                @if (currentUser != null)
+                {
+                    <button type="button" 
+                            title="Add ingredients to cart" 
+                            style="margin: 0; padding: 0.5rem 0.75rem; background: none; border: none; color: inherit; cursor: pointer;"
+                            onclick="event.stopPropagation()"
+                            hx-post="/Cart/AddRecipeIngredientsToCart?recipeId=@Model.Id" 
+                            hx-swap="none">
                         <span class="fas fa-basket-shopping"></span>
                     </button>
-                </form>
-            }
-        </div>
+                    @if (userCollections.Any())
+                    {
+                        <div style="position:relative;">
+                            <button type="button" onclick="event.stopPropagation(); var el=document.getElementById('feed-collection-picker-@Model.Id'); el.style.display = el.style.display === 'block' ? 'none' : 'block';" title="Save" style="margin: 0; padding: 0.5rem 0.75rem; background: none; border: none; color: inherit; cursor: pointer;">
+                                <span class="fas fa-bookmark"></span>
+                            </button>
+                            <div id="feed-collection-picker-@Model.Id" style="display:none; position:absolute; right:0; z-index:100; background:white; padding:0.5rem; border:1px solid #ddd; border-radius:0.25rem; min-width:200px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                                @if (!userCollections.Any())
+                                {
+                                    <div>
+                                        <p>No collections yet.</p>
+                                        <p><a asp-controller="Collections" asp-action="Create" onclick="event.stopPropagation()">Create one</a></p>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <form asp-controller="Collections" asp-action="AddRecipe" method="post" onclick="event.stopPropagation()">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="recipeId" value="@Model.Id" />
+                                        <input type="hidden" name="returnUrl" value="@returnUrl" />
+                                        <label>
+                                            Add to
+                                            <select name="collectionId" required style="width:100%; margin-top:0.25rem;">
+                                                <option value="">Choose...</option>
+                                                @foreach (var c in userCollections)
+                                                {
+                                                    <option value="@c.Id">@c.Name</option>
+                                                }
+                                            </select>
+                                        </label>
+                                        <div style="margin-top:0.5rem; display:flex; gap:0.5rem; justify-content:flex-end;">
+                                            <button type="submit" class="button">Save</button>
+                                            <button type="button" onclick="event.stopPropagation(); document.getElementById('feed-collection-picker-@Model.Id').style.display='none'" style="background: none; border: none; color: inherit; cursor: pointer; padding: 0.5rem 0.75rem;">Cancel</button>
+                                        </div>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
     </footer>
+    </div>
 </article>

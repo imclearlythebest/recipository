@@ -13,218 +13,213 @@
 
 <p><a asp-controller="Home" asp-action="Index">← Back</a></p>
 
-<article>
-    <header>
-        <strong>@Model.Title</strong>
-        <br />
-        <a asp-controller="User" asp-action="Profile" asp-route-username="@Model.Author.UserName">
-            <small>- @Model.Author.DisplayName</small>
-        </a>
-    </header>
-    <div id="cart-toast"></div>
+<article style="padding: 2.5rem;">
+    <h1 style="text-align:center; text-decoration:underline; margin-bottom:2rem;">@Model.Title</h1>
     
-    <div class="grid" style="margin-bottom: 2rem;">
-        <div>
-            <strong>⏱️ Prep:</strong> @Model.PrepTime min
+    @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+    {
+        <div style="margin-bottom: 2.5rem;">
+            <img src="@Model.CoverImageUrl" alt="@Model.Title" style="width: 100%; max-height: 500px; object-fit: cover; border-radius: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
         </div>
-        <div>
-            <strong>🔥 Cook:</strong> @Model.CookTime min
-        </div>
-        <div>
-            <strong>👥 Serves:</strong> @Model.ServingSize
-        </div>
-        <div>
-            <strong>⭐ Difficulty:</strong> @Model.Difficulty
-        </div>
-    </div>
+    }
 
-    <section>
-        <h3>Overview</h3>
-        <p>@Model.MainText</p>
-    </section>
+    @if (currentUser?.Id == Model.ApplicationUserId && Model.Status != "Published")
+    {
+        <div style="margin-bottom: 2rem; display: flex; flex-direction: column; gap: 1rem;">
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <span style="font-weight: bold;">Status:</span>
+                @if (Model.Status == "Draft")
+                {
+                    <span class="badge secondary">Draft</span>
+                }
+                else if (Model.Status == "PendingApproval")
+                {
+                    <span class="badge warning">Pending Approval</span>
+                }
+                else if (Model.Status == "Rejected")
+                {
+                    <span class="badge danger" style="background: var(--pico-del-color);">Rejected</span>
+                }
+            </div>
 
-    <div class="grid">
-        <section id="ingredients">
-            <h3>Ingredients</h3>
-            @if (Model.Ingredients.Any())
+            @if (Model.Status == "Rejected" && !string.IsNullOrEmpty(Model.RejectionReason))
             {
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <p style="margin: 0;">This recipe requires @Model.Ingredients.Count ingredients.</p>
-                    @if (User.Identity?.IsAuthenticated == true)
+                <div style="background-color: #fff5f5; border: 1px solid #feb2b2; padding: 1.25rem; border-radius: 0.5rem; color: #c53030; border-left: 5px solid #f56565;">
+                    <h5 style="color: #c53030; margin-bottom: 0.5rem;"><i class="fas fa-exclamation-circle"></i> Revision Required</h5>
+                    <p style="margin: 0; line-height: 1.6;">@Model.RejectionReason</p>
+                </div>
+            }
+        </div>
+    }
+
+    <div id="cart-toast"></div>
+
+    <h4 style="margin-bottom:0.75rem;">Summary</h4>
+    <p style="line-height:1.7; margin:0 0 1.5rem 0;">@Model.MainText</p>
+
+    <h4 style="margin-bottom:0.75rem;">At a Glance</h4>
+    <ul style="margin:0 0 1.5rem 1.25rem; padding:0; line-height:1.8;">
+        <li><strong>Prep Time:</strong> @Model.PrepTime minutes</li>
+        <li><strong>Cook Time:</strong> @Model.CookTime minutes</li>
+        <li><strong>Servings:</strong> @Model.ServingSize</li>
+        <li><strong>Difficulty:</strong> @Model.Difficulty</li>
+        <li><strong>Estimated Calories:</strong> @Math.Round(Model.EstimatedCalories) cal</li>
+    </ul>
+
+    <hr style="margin:1.5rem 0;">
+
+    <h4 style="margin-bottom:0.75rem;">Ingredients</h4>
+    @if (Model.Ingredients.Any())
+    {
+        <ul style="margin:0 0 1rem 1.25rem; padding:0; line-height:1.8;">
+            @foreach (var ingredient in Model.Ingredients)
+            {
+                <li style="margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                    <span><strong>@ingredient.Name</strong></span>
+                    @if (ingredient is ShopItem shopItem)
                     {
-                        <button class="primary" 
-                                style="margin: 0;"
-                                hx-post="/Cart/AddRecipeIngredientsToCart?recipeId=@Model.Id" 
-                                hx-swap="none">
-                            Add All to Cart
-                        </button>
+                        <span style="color: var(--pico-muted-color); font-size:0.9rem;">৳@shopItem.Price.ToString("F2")</span>
+                        @if (currentUser != null)
+                        {
+                            <a href="#" hx-post="/Cart/AddToCart/@shopItem.Id?recipeId=@Model.Id" hx-swap="none" title="Add to cart" style="color: var(--pico-form-element-valid-border-color); text-decoration:none; font-size:0.9rem;">
+                                <i class="fa-solid fa-basket-shopping"></i>
+                            </a>
+                        }
                     }
                     else
                     {
-                        <a href="/Auth/Login?ReturnUrl=@Context.Request.Path" class="button primary" style="margin: 0;">Login to Buy All</a>
+                        <small style="color: var(--pico-muted-color);">Not in shop</small>
                     }
-                </div>
-                <table role="grid">
-                    <thead>
-                        <tr>
-                            <th>Ingredient</th>
-                            <th>Type</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var ingredient in Model.Ingredients)
-                        {
-                            <tr>
-                                <td>@ingredient.Name</td>
-                                <td>@ingredient.Type</td>
-                                <td>
-                                    @if (ingredient is ShopItem shopItem)
-                                    {
-                                        @if (User.Identity?.IsAuthenticated == true)
-                                        {
-                                            <button class="outline secondary" 
-                                                    style="padding: 4px 8px; margin: 0; font-size: 0.8rem;"
-                                                    hx-post="/Cart/AddToCart/@shopItem.Id?recipeId=@Model.Id" 
-                                                    hx-swap="none">
-                                                Add ($@shopItem.Price.ToString("F2"))
-                                            </button>
-                                        }
-                                        else
-                                        {
-                                            <a href="/Auth/Login?ReturnUrl=@Context.Request.Path" 
-                                               class="button outline secondary" 
-                                               style="padding: 4px 8px; margin: 0; font-size: 0.8rem; text-decoration: none; display: inline-block;">
-                                                Login to Buy
-                                            </a>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <small>Not in shop</small>
-                                    }
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                </li>
             }
-            else
-            {
-                <p>No ingredients listed.</p>
-            }
+        </ul>
 
-            <div class="alert info" style="background: var(--pico-card-background-color); padding: 1rem; border-radius: var(--pico-border-radius); margin-top: 1rem;">
-                <strong>Total Estimated Calories:</strong> @Math.Round(Model.EstimatedCalories) cal
-            </div>
-        </section>
+    }
+    else
+    {
+        <p>No ingredients listed.</p>
+    }
 
-        <section>
-            <h3>Instructions</h3>
-            <div style="white-space: pre-wrap;">@Model.Instructions</div>
-        </section>
+    <hr style="margin:1.5rem 0;">
+
+    <h4 style="margin-bottom:0.75rem;">Instructions</h4>
+    <div style="white-space: pre-wrap; line-height:1.8;">@Model.Instructions</div>
+
+    <div style="text-align: right; margin-top: 2rem;">
+        <p class="text-muted" style="margin:0;">
+            Recipe by <a asp-controller="User" asp-action="Profile" asp-route-username="@Model.Author.UserName" style="color:inherit; font-weight:bold;">@Model.Author.DisplayName</a> • <small>@Model.CreatedAt.ToShortDateString()</small>
+        </p>
     </div>
 
-    <time datetime="@Model.CreatedAt.ToUniversalTime():O">@Model.CreatedAt.ToLocalTime()</time>
     <footer>
-        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
-            @{
-                var vc = new Website.Models.ViewModels.VoteControlsViewModel
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+            <div style="display:flex; gap:0.5rem; align-items:center;">
+                @{
+                    var vc = new Website.Models.ViewModels.VoteControlsViewModel
+                    {
+                        ContentId = Model.Id,
+                        Score = Model.Score,
+                        UserVote = userVote?.VoteType,
+                        CanVote = currentUser != null,
+                        ReturnUrl = voteReturnUrl ?? string.Empty
+                    };
+                }
+                @await Html.PartialAsync("_VoteControls", vc)
+            </div>
+            <div style="display:flex; gap:0.5rem; align-items:center;">
+                @if (reviewCount > 0)
                 {
-                    ContentId = Model.Id,
-                    Score = Model.Score,
-                    UserVote = userVote?.VoteType,
-                    CanVote = currentUser != null,
-                    ReturnUrl = voteReturnUrl ?? string.Empty
-                };
-            }
-            @if (reviewCount > 0)
-            {
-                <button type="button" class="secondary outline" style="margin: 0; padding: 0.5rem 0.75rem;" title="Average rating">
-                    <span class="fas fa-star"></span> @averageRating.ToString("0.0") (@reviewCount)
-                </button>
-            }
-            @await Html.PartialAsync("_VoteControls", vc)
-            
-            @if (currentUser != null)
-            {
-                <button type="button" 
-                        class="secondary outline" 
-                        title="Add ingredients to cart" 
-                        style="margin: 0; padding: 0.5rem 0.75rem;"
-                        hx-post="/Cart/AddRecipeIngredientsToCart?recipeId=@Model.Id" 
-                        hx-swap="none">
-                    <span class="fas fa-cart-plus"></span>
-                </button>
-            }
-
-            @* Save to Collection button *@
-            @{
-                var userCollections = ViewData["UserCollections"] as List<Collection> ?? new List<Collection>();
-            }
-            @if (currentUser != null && userCollections.Any())
-            {
-                <div style="position:relative;">
-                    <button type="button" class="secondary outline" onclick="var el=document.getElementById('expanded-collection-picker-@Model.Id'); el.style.display = el.style.display === 'block' ? 'none' : 'block';" title="Save to collection" style="margin: 0; padding: 0.5rem 0.75rem;">
-                        <span class="fas fa-bookmark"></span>
-                    </button>
-                    <div id="expanded-collection-picker-@Model.Id" style="display:none; position:absolute; right:0; z-index:30; background:white; padding:0.5rem; border:1px solid #ddd; border-radius:0.25rem; min-width:200px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
-                        <form asp-controller="Collections" asp-action="AddRecipe" method="post">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="recipeId" value="@Model.Id" />
-                            <input type="hidden" name="returnUrl" value="@Url.Action("Post", "Home", new { id = Model.Id })" />
-                            <label>
-                                Add to
-                                <select name="collectionId" required style="width:100%; margin-top:0.25rem;">
-                                    <option value="">Choose...</option>
-                                    @foreach (var c in userCollections)
-                                    {
-                                        <option value="@c.Id">@c.Name</option>
-                                    }
-                                </select>
-                            </label>
-                            <div style="margin-top:0.5rem; display:flex; gap:0.5rem; justify-content:flex-end;">
-                                <button type="submit" class="button">Save</button>
-                                <button type="button" class="secondary outline" onclick="document.getElementById('expanded-collection-picker-@Model.Id').style.display='none'">Cancel</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            }
-
-            @if (currentUser != null)
-            {
-                <form asp-controller="Home" asp-action="SimulatePurchase" method="post" style="margin:0;">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="recipeId" value="@Model.Id" />
-                    <input type="hidden" name="returnUrl" value="@Url.Action("Post", "Home", new { id = Model.Id })" />
-                    <button type="submit" class="secondary outline" title="Simulate purchase" style="margin: 0; padding: 0.5rem 0.75rem;">
+                    <a asp-controller="Home" asp-action="Post" asp-route-id="@Model.Id" title="Average rating" style="margin: 0; padding: 0.5rem 0.75rem; color: var(--pico-form-element-valid-border-color); text-decoration: none; cursor: pointer;">
+                        <span class="fas fa-star"></span> @averageRating.ToString("0.0") (@reviewCount)
+                    </a>
+                }
+                @if (currentUser != null)
+                {
+                    <button type="button" 
+                            title="Add all ingredients to cart" 
+                            style="margin: 0; padding: 0.5rem 0.75rem; background: none; border: none; color: inherit; cursor: pointer;"
+                            hx-post="/Cart/AddRecipeIngredientsToCart?recipeId=@Model.Id" 
+                            hx-swap="none">
                         <span class="fas fa-basket-shopping"></span>
                     </button>
-                </form>
-            }
+                }
+
+                @* Save to Collection button *@
+                @{
+                    var userCollections = ViewData["UserCollections"] as List<Collection> ?? new List<Collection>();
+                }
+                @if (currentUser != null && userCollections.Any())
+                {
+                    <div style="position:relative;">
+                        <button type="button" onclick="var el=document.getElementById('post-collection-picker-@Model.Id'); el.style.display = el.style.display === 'block' ? 'none' : 'block';" title="Save to collection" style="margin: 0; padding: 0.5rem 0.75rem; background: none; border: none; color: inherit; cursor: pointer;">
+                            <span class="fas fa-bookmark"></span>
+                        </button>
+                        <div id="post-collection-picker-@Model.Id" style="display:none; position:absolute; right:0; z-index:100; background:white; padding:0.5rem; border:1px solid #ddd; border-radius:0.25rem; min-width:200px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                            <form asp-controller="Collections" asp-action="AddRecipe" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="recipeId" value="@Model.Id" />
+                                <input type="hidden" name="returnUrl" value="@Url.Action("Post", "Home", new { id = Model.Id })" />
+                                <label>
+                                    Add to
+                                    <select name="collectionId" required style="width:100%; margin-top:0.25rem;">
+                                        <option value="">Choose...</option>
+                                        @foreach (var c in userCollections)
+                                        {
+                                            <option value="@c.Id">@c.Name</option>
+                                        }
+                                    </select>
+                                </label>
+                                <div style="margin-top:0.5rem; display:flex; gap:0.5rem; justify-content:flex-end;">
+                                    <button type="submit" class="button">Save</button>
+                                    <button type="button" onclick="document.getElementById('post-collection-picker-@Model.Id').style.display='none'" style="background: none; border: none; color: inherit; cursor: pointer; padding: 0.5rem 0.75rem;">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
         </div>
     </footer>
 </article>
 
 @if (reviewCount > 0)
 {
-    <section id="reviews">
-        <h3>Reviews</h3>
-        @foreach (var review in Model.Reviews.OrderByDescending(r => r.CreatedAt))
-        {
-            <article>
-                <header>
-                    <a asp-controller="User" asp-action="Profile" asp-route-username="@review.User?.UserName">
-                        <strong>@(review.User?.DisplayName ?? "Unknown user")</strong>
-                    </a>
-                    <br />
-                    <strong>@review.Rating / 5</strong>
-                    <small>@review.CreatedAt.ToLocalTime().ToString("g")</small>
-                </header>
-                <p>@review.ReviewText</p>
-            </article>
-        }
+    <section id="reviews" style="margin-top: 3rem;">
+        <h3 style="display:flex; align-items:center; gap:0.75rem;">
+            Reviews 
+            <span style="font-size: 1rem; font-weight: normal; color: var(--pico-muted-color);">
+                <i class="fas fa-star" style="color: #ffc107;"></i> @averageRating.ToString("0.0")
+            </span>
+        </h3>
+        <div class="reviews-list">
+            @foreach (var review in Model.Reviews.OrderByDescending(r => r.CreatedAt))
+            {
+                <article style="margin-bottom: 1.5rem; padding: 1.5rem; border-radius: 12px; border-left: 4px solid var(--pico-primary);">
+                    <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border: none; padding: 0; background: none;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <a asp-controller="User" asp-action="Profile" asp-route-username="@review.User?.UserName" style="text-decoration: none; font-weight: 600; color: var(--pico-color);">
+                                @(review.User?.DisplayName ?? "Unknown user")
+                            </a>
+                            <span style="color: var(--pico-muted-color); font-size: 0.85rem;">• @review.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</span>
+                        </div>
+                        <div class="stars" style="color: #ffc107; font-size: 0.9rem;">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                if (i <= review.Rating)
+                                {
+                                    <i class="fas fa-star"></i>
+                                }
+                                else
+                                {
+                                    <i class="far fa-star" style="color: #ccc;"></i>
+                                }
+                            }
+                        </div>
+                    </header>
+                    <p style="margin: 0; font-style: italic; color: var(--pico-color);">"@review.ReviewText"</p>
+                </article>
+            }
+        </div>
     </section>
 }
 

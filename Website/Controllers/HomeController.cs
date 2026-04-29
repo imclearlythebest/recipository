@@ -25,6 +25,7 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
             .ThenInclude(c => c.Author)
             .Include(r => r.Replies)
             .ThenInclude(c => c.Votes)
+            .Where(r => r.Status == "Published")
             .AsQueryable();
 
         if (feedType == "followers" && currentUser != null)
@@ -93,6 +94,7 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
             .ThenInclude(c => c.Author)
             .Include(r => r.Replies)
             .ThenInclude(c => c.Votes)
+            .Where(r => r.Status == "Published")
             .AsQueryable();
 
         if (feedType == "followers" && currentUser != null)
@@ -193,6 +195,12 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
             .FirstOrDefaultAsync(r => r.Id == id);
 
         if (recipe == null) return NotFound();
+        
+        // Authorization check: only show non-published recipes to author or admin
+        if (recipe.Status != "Published" && currentUser?.Id != recipe.ApplicationUserId && !User.IsInRole("Admin"))
+        {
+            return NotFound();
+        }
 
         if (currentUser != null)
         {
