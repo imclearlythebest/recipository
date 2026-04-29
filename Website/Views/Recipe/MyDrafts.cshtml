@@ -1,0 +1,55 @@
+@model List<Website.Models.Dtos.RecipeResponseDto>
+
+@{
+    ViewData["Title"] = "My Draft Recipes";
+}
+
+<article>
+    <header>
+        <h1>My Draft Recipes</h1>
+        <p>Recipes you're still working on. They are only visible to you.</p>
+    </header>
+
+    @if (Model.Count == 0)
+    {
+        <div style="text-align: center; padding: 3rem 0;">
+            <i class="fa-solid fa-file-signature" style="font-size: 4rem; color: var(--pico-muted-color); margin-bottom: 1rem; display: block;"></i>
+            <h3>No drafts yet</h3>
+            <p>You haven't started any recipe drafts. Why not share your favorite dish?</p>
+            <a asp-action="Create" class="button">Create New Recipe</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="striped">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Created</th>
+                        <th>Ingredients</th>
+                        <th>Calories</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var recipe in Model)
+                    {
+                        <tr>
+                            <td><strong>@recipe.Title</strong></td>
+                            <td>@recipe.CreatedAt.ToShortDateString()</td>
+                            <td>@recipe.Ingredients.Count</td>
+                            <td>@Math.Round(recipe.EstimatedCalories) cal</td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <a asp-action="Details" asp-route-id="@recipe.Id" class="outline secondary" role="button" style="padding: 0.25rem 0.5rem;"><i class="fa-solid fa-eye"></i></a>
+                                    <a href="#" class="outline primary" role="button" style="padding: 0.25rem 0.5rem;"><i class="fa-solid fa-pen-to-square"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</article>
