@@ -31,7 +31,7 @@ public class CartController : Controller
   }
 
   [HttpPost]
-  public async Task<IActionResult> AddToCart(int id)
+  public async Task<IActionResult> AddToCart(int id, int? recipeId)
   {
     var userId = _userManager.GetUserId(User);
     if (string.IsNullOrEmpty(userId)) return Challenge();
@@ -55,7 +55,7 @@ public class CartController : Controller
 
     // Update Cart in Database
     var existing = await _context.CartItems
-      .FirstOrDefaultAsync(x => x.ShopItemId == id && x.ApplicationUserId == userId);
+      .FirstOrDefaultAsync(x => x.ShopItemId == id && x.ApplicationUserId == userId && x.OriginatingRecipeId == recipeId);
 
     if (existing != null) {
       existing.Quantity += 1;
@@ -63,7 +63,8 @@ public class CartController : Controller
       _context.CartItems.Add(new CartItem { 
         ShopItemId = id, 
         ApplicationUserId = userId!, 
-        Quantity = 1 
+        Quantity = 1,
+        OriginatingRecipeId = recipeId
       });
     }
 
@@ -180,7 +181,7 @@ public class CartController : Controller
         {
             item.Stock -= 1;
             var existing = await _context.CartItems
-                .FirstOrDefaultAsync(x => x.ShopItemId == item.Id && x.ApplicationUserId == userId);
+                .FirstOrDefaultAsync(x => x.ShopItemId == item.Id && x.ApplicationUserId == userId && x.OriginatingRecipeId == recipeId);
 
             if (existing != null) {
                 existing.Quantity += 1;
@@ -188,7 +189,8 @@ public class CartController : Controller
                 _context.CartItems.Add(new CartItem { 
                     ShopItemId = item.Id, 
                     ApplicationUserId = userId!, 
-                    Quantity = 1 
+                    Quantity = 1,
+                    OriginatingRecipeId = recipeId
                 });
             }
             addedCount++;
