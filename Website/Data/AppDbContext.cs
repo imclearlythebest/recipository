@@ -211,6 +211,14 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
       entity.Property(rr => rr.PlatformShare).HasPrecision(18, 2);
     });
 
+    modelBuilder.Entity<OrderItem>(entity =>
+    {
+        entity.HasOne<Recipe>()
+              .WithMany()
+              .HasForeignKey(oi => oi.RecipeId)
+              .OnDelete(DeleteBehavior.SetNull);
+    });
+
     // --- MARKETPLACE & INGREDIENT SEED ---
     modelBuilder.Entity<ShopItem>().HasData(
       new ShopItem { Id = 1, Name = "Tomato", Description = "Red, juicy fruit", ImageUrl = "/images/tomato.jpg", Calories = 20, Price = 0.00f, Stock = 100, Moq = 1, Increment = 1, Type=IngredientType.Vegetable },
@@ -224,9 +232,9 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     string adminUserId = "b74ddd14-6340-4840-95c2-db12554843e5"; // Fixed GUID
 
     modelBuilder.Entity<Recipe>().HasData(
-      new Recipe { Id = 1, Title = "How To Make Souvlaki", MainText = "This is some content.", CreatedAt = new DateTime(2024, 6, 1), ApplicationUserId = adminUserId },
-      new Recipe { Id = 2, Title = "Bongoposhagor-ian Dish", MainText = "This is some more content.", CreatedAt = new DateTime(2024, 6, 2), ApplicationUserId = adminUserId },
-      new Recipe { Id = 3, Title = "How To Make Bhelpuri", MainText = "This is even more content.", CreatedAt = new DateTime(2024, 6, 3), ApplicationUserId = adminUserId }
+      new Recipe { Id = 1, Title = "How To Make Souvlaki", MainText = "This is some content.", Instructions = "1. Marinate meat, 2. Grill meat.", CreatedAt = new DateTime(2024, 6, 1), ApplicationUserId = adminUserId, PrepTime = 30, CookTime = 20, ServingSize = 4, Status = "Published" },
+      new Recipe { Id = 2, Title = "Bongoposhagor-ian Dish", MainText = "This is some more content.", Instructions = "1. Mix ingredients, 2. Steam.", CreatedAt = new DateTime(2024, 6, 2), ApplicationUserId = adminUserId, PrepTime = 15, CookTime = 10, ServingSize = 2, Status = "Published" },
+      new Recipe { Id = 3, Title = "How To Make Bhelpuri", MainText = "This is even more content.", Instructions = "1. Toss ingredients, 2. Serve.", CreatedAt = new DateTime(2024, 6, 3), ApplicationUserId = adminUserId, PrepTime = 10, CookTime = 0, ServingSize = 1, Status = "Published" }
     );
 
     modelBuilder.Entity<IdentityRole>().HasData(new IdentityRole

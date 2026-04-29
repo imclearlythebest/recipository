@@ -8,5 +8,6 @@ public class OrderItem
   public int Quantity { get; set; }
   public float PriceAtPurchase { get; set; }
   
+  public int? RecipeId { get; set; }
   public ShopItem? Product { get; set; }
 }
