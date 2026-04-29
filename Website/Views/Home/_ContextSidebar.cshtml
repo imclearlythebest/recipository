@@ -12,12 +12,12 @@
             <span class="fas fa-plus"></span> Create
           </summary>
           <ul>
+            <li><a asp-controller="Recipe" asp-action="Create">Recipe</a></li>
             <li><a asp-controller="Ingredients" asp-action="Create">Ingredient</a></li>
             @if (User.IsInRole("Admin"))
             {
               <li><a asp-controller="Ingredients" asp-action="CreateShopItem">Shop Item</a></li>
             }
-            <li><a href="#">Recipe</a></li>
           </ul>
         </details>
       </li>

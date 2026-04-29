@@ -3,9 +3,14 @@
 }
 
 <section>
-  <button type="button" onclick="window.history.back()" style="width: 100%;">
-    <i class="fas fa-arrow-left"></i> Back
-  </button>
+  <div class="grid">
+    <button type="button" onclick="window.history.back()" class="outline secondary">
+      <i class="fas fa-arrow-left"></i> Back
+    </button>
+    <button type="button" onclick="window.location.href='/Cart'" class="secondary">
+      <i class="fas fa-shopping-cart"></i> Cart
+    </button>
+  </div>
 </section>
 
 @if (action == "Index")
