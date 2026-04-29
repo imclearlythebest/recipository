@@ -17,30 +17,89 @@
             <p>This review will appear on the recipe after submission.</p>
         </section>
 
-        <form asp-action="Review" method="post">
+        <form asp-action="Review" method="post" id="review-form">
             @Html.AntiForgeryToken()
             <input type="hidden" name="id" value="@Model.Id" />
+            <input type="hidden" name="rating" id="rating-value" value="5" />
 
-            <label>
-                Rating
-                <select name="rating" required>
-                    <option value="5">5 - Excellent</option>
-                    <option value="4">4 - Great</option>
-                    <option value="3">3 - Good</option>
-                    <option value="2">2 - Fair</option>
-                    <option value="1">1 - Poor</option>
-                </select>
-            </label>
+            <div class="rating-container" style="margin-bottom: 2rem; text-align: center;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Rating</label>
+                <div class="stars" style="font-size: 2.5rem; display: flex; justify-content: center; gap: 0.5rem; color: #ccc; cursor: pointer;">
+                    <i class="fas fa-star" data-value="1"></i>
+                    <i class="fas fa-star" data-value="2"></i>
+                    <i class="fas fa-star" data-value="3"></i>
+                    <i class="fas fa-star" data-value="4"></i>
+                    <i class="fas fa-star" data-value="5" style="color: #ffc107;"></i>
+                </div>
+                <small id="rating-label" class="text-muted">Excellent</small>
+            </div>
 
             <label>
                 Review
-                <textarea name="reviewText" rows="5" placeholder="Tell us what you thought..." required></textarea>
+                <textarea name="reviewText" rows="5" placeholder="Tell us what you thought about this recipe..." required></textarea>
             </label>
 
             <div class="grid" style="margin-top: 1.5rem;">
-                <button type="submit">Submit Review</button>
-                <button type="button" class="secondary outline" onclick="window.location.href='@Url.Action("Post", "Home", new { id = Model.RecipeId })'">Cancel</button>
+                <button type="submit" class="primary">Submit Review</button>
+                <a asp-controller="Home" asp-action="Post" asp-route-id="@Model.RecipeId" class="secondary outline" role="button">Cancel</a>
             </div>
         </form>
+
+        <style>
+            .stars i { transition: color 0.2s, transform 0.1s; }
+            .stars i:hover { transform: scale(1.2); }
+            .stars i.active { color: #ffc107; }
+        </style>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const stars = document.querySelectorAll('.stars i');
+                const ratingInput = document.getElementById('rating-value');
+                const ratingLabel = document.getElementById('rating-label');
+                const labels = {
+                    '1': 'Poor',
+                    '2': 'Fair',
+                    '3': 'Good',
+                    '4': 'Great',
+                    '5': 'Excellent'
+                };
+
+                stars.forEach(star => {
+                    star.addEventListener('click', function() {
+                        const val = this.getAttribute('data-value');
+                        ratingInput.value = val;
+                        ratingLabel.textContent = labels[val];
+                        
+                        stars.forEach(s => {
+                            if (parseInt(s.getAttribute('data-value')) <= parseInt(val)) {
+                                s.style.color = '#ffc107';
+                            } else {
+                                s.style.color = '#ccc';
+                            }
+                        });
+                    });
+
+                    star.addEventListener('mouseenter', function() {
+                        const val = this.getAttribute('data-value');
+                        stars.forEach(s => {
+                            if (parseInt(s.getAttribute('data-value')) <= parseInt(val)) {
+                                s.style.color = '#ffd700';
+                            }
+                        });
+                    });
+
+                    star.addEventListener('mouseleave', function() {
+                        const currentVal = ratingInput.value;
+                        stars.forEach(s => {
+                            if (parseInt(s.getAttribute('data-value')) <= parseInt(currentVal)) {
+                                s.style.color = '#ffc107';
+                            } else {
+                                s.style.color = '#ccc';
+                            }
+                        });
+                    });
+                });
+            });
+        </script>
     </article>
 </main>

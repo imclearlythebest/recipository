@@ -3,12 +3,14 @@
 }
 
 <section>
-  <button type="button" onclick="window.history.back()" style="width: 100%;">
-    <i class="fas fa-arrow-left"></i> Back
-  </button>
-  <a href="/Cart" role="button" class="secondary" style="width: 100%; margin-top: 0.5rem;">
-    <i class="fas fa-shopping-cart"></i> Cart
-  </a>
+  <div class="grid">
+    <button type="button" onclick="window.history.back()" class="outline secondary">
+      <i class="fas fa-arrow-left"></i> Back
+    </button>
+    <button type="button" onclick="window.location.href='/Cart'" class="secondary">
+      <i class="fas fa-shopping-cart"></i> Cart
+    </button>
+  </div>
 </section>
 
 @if (action == "Index")
@@ -49,16 +51,16 @@
         All Prices
       </label>
       <label>
-        <input type="radio" name="priceRange" value="under-10">
-        Under $10
+        <input type="radio" name="priceRange" value="under-100">
+        Under ৳100
       </label>
       <label>
-        <input type="radio" name="priceRange" value="10-25">
-        $10 - $25
+        <input type="radio" name="priceRange" value="100-500">
+        ৳100 - ৳500
       </label>
       <label>
-        <input type="radio" name="priceRange" value="over-25">
-        Over $25
+        <input type="radio" name="priceRange" value="over-500">
+        Over ৳500
       </label>
     </section>
   </form>

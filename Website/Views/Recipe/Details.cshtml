@@ -1,93 +1,160 @@
 @model Website.Models.Dtos.RecipeResponseDto
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
 
 @{
     ViewData["Title"] = Model.Title;
     var shopItems = ViewBag.ShopItems as Dictionary<int, float> ?? new Dictionary<int, float>();
+    var instructionSteps = !string.IsNullOrWhiteSpace(Model.Instructions)
+        ? Model.Instructions.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries)
+        : Array.Empty<string>();
 }
 
-<article>
-    <header>
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
-            <div>
-                <h1 style="margin-bottom: 0;">@Model.Title</h1>
-                <p class="text-muted">By <strong>@Model.AuthorName</strong> • @Model.CreatedAt.ToShortDateString()</p>
-            </div>
-            <div>
-                @if (Model.Status == "Draft")
-                {
-                    <span class="badge secondary">Draft</span>
-                }
-                else if (Model.Status == "PendingApproval")
-                {
-                    <span class="badge warning">Pending Approval</span>
-                }
-                else if (Model.Status == "Published")
-                {
-                    <span class="badge success">Published</span>
-                }
-            </div>
+<article style="padding: 2.5rem;">
+    <h1 style="text-align:center; text-decoration:underline; margin-bottom:1rem;">@Model.Title</h1>
+    
+    @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+    {
+        <div style="margin-bottom: 2rem;">
+            <img src="@Model.CoverImageUrl" alt="@Model.Title" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" />
         </div>
-    </header>
+    }
+
+    <div style="display:flex; gap:0.5rem; justify-content:center; margin-bottom:2rem;">
+        @if (Model.Status == "Draft")
+        {
+            <span class="badge secondary">Draft</span>
+        }
+        else if (Model.Status == "PendingApproval")
+        {
+            <span class="badge warning">Pending Approval</span>
+        }
+        else if (Model.Status == "Published")
+        {
+            <span class="badge success">Published</span>
+        }
+        else if (Model.Status == "Rejected")
+        {
+            <span class="badge danger" style="background: var(--pico-del-color);">Rejected</span>
+        }
+    </div>
+
+    @if (Model.Status == "Rejected" && !string.IsNullOrEmpty(Model.RejectionReason))
+    {
+        <div style="background-color: #fff5f5; border: 1px solid #feb2b2; padding: 1.25rem; border-radius: 0.5rem; margin-bottom: 2rem; color: #c53030; border-left: 5px solid #f56565;">
+            <h5 style="color: #c53030; margin-bottom: 0.5rem;"><i class="fas fa-exclamation-circle"></i> Revision Required</h5>
+            <p style="margin: 0; line-height: 1.6;">@Model.RejectionReason</p>
+        </div>
+    }
 
     @* Target for cart feedback *@
     <div id="cart-toast"></div>
 
-    <div class="grid" style="margin-bottom: 2rem;">
-        <div>
-            <strong>⏱️ Prep:</strong> @Model.PrepTime min
-        </div>
-        <div>
-            <strong>🔥 Cook:</strong> @Model.CookTime min
-        </div>
-        <div>
-            <strong>👥 Serves:</strong> @Model.ServingSize
-        </div>
-        <div>
-            <strong>⭐ Difficulty:</strong> @Model.Difficulty
-        </div>
+    <h4 style="margin-bottom:0.75rem;">Summary</h4>
+    <p style="line-height:1.7; margin:0 0 1.5rem 0;">@Model.MainText</p>
+
+    <h4 style="margin-bottom:0.75rem;">At a Glance</h4>
+    <ul style="margin:0 0 1.5rem 1.25rem; padding:0; line-height:1.8;">
+        <li><strong>Prep Time:</strong> @Model.PrepTime minutes</li>
+        <li><strong>Cook Time:</strong> @Model.CookTime minutes</li>
+        <li><strong>Servings:</strong> @Model.ServingSize</li>
+        <li><strong>Difficulty:</strong> @Model.Difficulty</li>
+        <li><strong>Estimated Calories:</strong> @Math.Round(Model.EstimatedCalories) cal</li>
+    </ul>
+
+    <hr style="margin:1.5rem 0;">
+
+    <h4 style="margin-bottom:0.75rem;">Ingredients</h4>
+    <ul style="margin:0 0 1rem 1.25rem; padding:0; line-height:1.8;">
+        @foreach (var ing in Model.Ingredients)
+        {
+            <li style="margin-bottom:0.5rem;">
+                <strong>@ing.IngredientName</strong> — @ing.Quantity @ing.Unit
+                <span style="color: var(--pico-muted-color); font-size:0.9rem;">(@Math.Round(ing.TotalCalories) cal)</span>
+            </li>
+        }
+    </ul>
+
+
+
+    <hr style="margin:1.5rem 0;">
+
+    <h4 style="margin-bottom:0.75rem;">Instructions</h4>
+    @if (instructionSteps.Length > 0)
+    {
+        <ol style="margin:0; padding-left:1.25rem; line-height:1.8;">
+            @foreach (var step in instructionSteps)
+            {
+                <li style="margin-bottom:0.5rem;">@step.Trim()</li>
+            }
+        </ol>
+    }
+    else
+    {
+        <div style="white-space: pre-wrap; line-height:1.8;">@Model.Instructions</div>
+    }
+
+    <div style="text-align: right; margin-top: 2rem;">
+        <p class="text-muted" style="margin:0;">
+            Recipe by <strong>@Model.AuthorName</strong> • <small>@Model.CreatedAt.ToShortDateString()</small>
+        </p>
     </div>
 
-    <section>
-        <h3>Overview</h3>
-        <p>@Model.MainText</p>
-    </section>
+    @{
+        var currentUser = await UserManager.GetUserAsync(User);
+        var userCollections = ViewData["UserCollections"] as List<Collection> ?? new List<Collection>();
+    }
 
-    <div class="grid">
-        <section>
-            <h3>Ingredients</h3>
-            <ul>
-                @foreach (var ing in Model.Ingredients)
+    @* Action footer for published recipes *@
+    @if (Model.Status == "Published")
+    {
+        <footer>
+            <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+                @if (currentUser != null)
                 {
-                    <li style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <span>
-                            <strong>@ing.IngredientName</strong>: @ing.Quantity @ing.Unit 
-                            <small class="text-muted">(@Math.Round(ing.TotalCalories) cal)</small>
-                        </span>
-                        
-                        @if (shopItems.ContainsKey(ing.IngredientId))
-                        {
-                            <button class="outline primary" 
-                                    style="padding: 2px 8px; margin: 0; font-size: 0.8rem; width: auto;"
-                                    hx-post="/Cart/AddToCart/@ing.IngredientId?recipeId=@Model.Id"
-                                    hx-swap="none"
-                                    title="Add to Cart - $@shopItems[ing.IngredientId].ToString("F2")">
-                                <i class="fa-solid fa-cart-plus"></i>
+                    <button type="button" 
+                            class="secondary outline" 
+                            title="Add all ingredients to cart" 
+                            style="margin: 0; padding: 0.5rem 0.75rem;"
+                            hx-post="/Cart/AddRecipeIngredientsToCart?recipeId=@Model.Id" 
+                            hx-swap="none">
+                        <span class="fas fa-basket-shopping"></span>
+                    </button>
+                    @if (userCollections.Any())
+                    {
+                        <div style="position:relative;">
+                            <button type="button" class="secondary outline" onclick="var el=document.getElementById('details-collection-picker-@Model.Id'); el.style.display = el.style.display === 'block' ? 'none' : 'block';" title="Save to collection" style="margin: 0; padding: 0.5rem 0.75rem;">
+                                <span class="fas fa-bookmark"></span>
                             </button>
-                        }
-                    </li>
+                            <div id="details-collection-picker-@Model.Id" style="display:none; position:absolute; right:0; z-index:30; background:white; padding:0.5rem; border:1px solid #ddd; border-radius:0.25rem; min-width:200px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+                                <form asp-controller="Collections" asp-action="AddRecipe" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="recipeId" value="@Model.Id" />
+                                    <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Recipe", new { id = Model.Id })" />
+                                    <label>
+                                        Add to
+                                        <select name="collectionId" required style="width:100%; margin-top:0.25rem;">
+                                            <option value="">Choose...</option>
+                                            @foreach (var c in userCollections)
+                                            {
+                                                <option value="@c.Id">@c.Name</option>
+                                            }
+                                        </select>
+                                    </label>
+                                    <div style="margin-top:0.5rem; display:flex; gap:0.5rem; justify-content:flex-end;">
+                                        <button type="submit" class="button">Save</button>
+                                        <button type="button" class="secondary outline" onclick="document.getElementById('details-collection-picker-@Model.Id').style.display='none'">Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    }
                 }
-            </ul>
-            <div class="alert info" style="background: var(--pico-card-background-color); padding: 1rem; border-radius: var(--pico-border-radius);">
-                <strong>Total Estimated Calories:</strong> @Math.Round(Model.EstimatedCalories) cal
             </div>
-        </section>
+        </footer>
+    }
 
-        <section>
-            <h3>Instructions</h3>
-            <div style="white-space: pre-wrap;">@Model.Instructions</div>
-        </section>
-    </div>
-
+    @* Draft/Submission footer *@
     @if (Model.AuthorId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value && Model.Status == "Draft")
     {
         <footer>

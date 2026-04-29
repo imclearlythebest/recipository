@@ -6,6 +6,7 @@ public class ShopItem : Ingredient
     public int Stock { get; set; }
     public int Moq { get; set; }
     public int Increment { get; set; }
+    public string? UnitName { get; set; }
 
     public ShopItem() : base()
     {
@@ -13,6 +14,7 @@ public class ShopItem : Ingredient
         Stock = 0;
         Moq = 0;
         Increment = 0;
+        UnitName = "per unit";
     }
 
     public ShopItem(string name, string description, string imageUrl, float calories, float price, int stock, int moq, int increment) 

@@ -29,18 +29,29 @@ else
     <div class="card-grid">
         @foreach (var recipe in Model.Recipes)
         {
-            <article>
-                <h3><a asp-controller="Home" asp-action="Post" asp-route-id="@recipe.Id">@recipe.Title</a></h3>
-                <p>@recipe.MainText</p>
-                @if (!isPublicView)
+            <article style="padding:0; overflow:hidden; display:flex; flex-direction:column; height:100%;">
+                @if (!string.IsNullOrEmpty(recipe.CoverImageUrl))
                 {
-                    <form asp-action="RemoveRecipe" method="post" style="display:inline;">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="collectionId" value="@Model.Id" />
-                        <input type="hidden" name="recipeId" value="@recipe.Id" />
-                        <button type="submit" class="secondary outline">Remove</button>
-                    </form>
+                    <a asp-controller="Home" asp-action="Post" asp-route-id="@recipe.Id">
+                        <img src="@recipe.CoverImageUrl" alt="@recipe.Title" style="width:100%; height:150px; object-fit:cover; border-top-left-radius:var(--pico-border-radius); border-top-right-radius:var(--pico-border-radius);" />
+                    </a>
                 }
+                <div style="padding: 1.25rem; flex:1; display:flex; flex-direction:column; justify-content:space-between;">
+                    <div>
+                        <h4 style="margin-bottom:0.5rem;"><a asp-controller="Home" asp-action="Post" asp-route-id="@recipe.Id" style="color:inherit; text-decoration:none;">@recipe.Title</a></h4>
+                        <p style="font-size: 0.9rem; line-height: 1.4; color: var(--pico-muted-color); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 1rem;">@recipe.MainText</p>
+                    </div>
+                    
+                    @if (!isPublicView)
+                    {
+                        <form asp-action="RemoveRecipe" method="post" style="margin:0;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="collectionId" value="@Model.Id" />
+                            <input type="hidden" name="recipeId" value="@recipe.Id" />
+                            <button type="submit" class="secondary outline contrast" style="width:100%; padding: 0.4rem 0.8rem; font-size: 0.85rem;">Remove</button>
+                        </form>
+                    }
+                </div>
             </article>
         }
     </div>

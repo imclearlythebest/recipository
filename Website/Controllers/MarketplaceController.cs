@@ -43,9 +43,9 @@ public class MarketplaceController : Controller
     {
       query = priceRange switch
       {
-        "under-10" => query.Where(i => i.Price < 10),
-        "10-25" => query.Where(i => i.Price >= 10 && i.Price <= 25),
-        "over-25" => query.Where(i => i.Price > 25),
+        "under-100" => query.Where(i => i.Price < 100),
+        "100-500" => query.Where(i => i.Price >= 100 && i.Price <= 500),
+        "over-500" => query.Where(i => i.Price > 500),
         _ => query
       };
     }

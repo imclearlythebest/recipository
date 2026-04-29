@@ -27,8 +27,8 @@ public class RevenueService : IRevenueService
                 return false;
             }
 
-            var authorShare = amount * 0.7m;
-            var platformShare = amount * 0.3m;
+            var authorShare = amount * 0.05m;
+            var platformShare = amount * 0.95m;
 
             var revenue = new RecipeRevenue
             {

@@ -14,7 +14,7 @@ public static class Routes
         app.MapControllerRoute(
             name: "ingredient",
             pattern: "Ingredients/{action=Index}/{id?}",
-            defaults: new { controller = "Ingredient" });
+            defaults: new { controller = "Ingredients" });
         app.MapControllerRoute(
             name: "collections",
             pattern: "Collections/{action=Index}/{id?}",

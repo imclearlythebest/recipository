@@ -4,6 +4,7 @@ public class RecipeResponseDto
 {
     public int Id { get; set; }
     public string Title { get; set; } = string.Empty;
+    public string? CoverImageUrl { get; set; }
     public string MainText { get; set; } = string.Empty;
     public string Instructions { get; set; } = string.Empty;
     public int PrepTime { get; set; }
@@ -16,6 +17,7 @@ public class RecipeResponseDto
     public DateTime? PublishedAt { get; set; }
     public string AuthorId { get; set; } = string.Empty;
     public string AuthorName { get; set; } = string.Empty;
+    public string? RejectionReason { get; set; }
     public List<RecipeIngredientDto> Ingredients { get; set; } = [];
 }
 

@@ -1,27 +1,27 @@
 @model VoteControlsViewModel
 
 <div id="vote-controls-@Model.ContentId" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-    <button type="button" class="secondary outline" style="margin: 0; padding: 0.5rem 0.75rem;" onclick="return false;">@Model.Score</button>
+    <span style="margin: 0; padding: 0.5rem 0.75rem; font-weight: bold; min-width: 2rem; text-align: center;">@Model.Score</span>
     @if (Model.CanVote)
     {
         <form asp-controller="Home" asp-action="Upvote" method="post" hx-post="@Url.Action("Upvote", "Home")" hx-target="#vote-controls-@Model.ContentId" hx-swap="outerHTML" style="margin: 0; padding: 0;">
             <input type="hidden" name="contentId" value="@Model.ContentId" />
             <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
-            <button type="submit" class="@(Model.UserVote == VoteType.Upvote ? "secondary" : "secondary outline")" style="margin: 0; padding: 0.5rem 0.75rem;" title="Upvote" aria-label="Upvote">
+            <button type="submit" style="margin: 0; padding: 0.5rem 0.75rem; background: none; border: none; color: @(Model.UserVote == VoteType.Upvote ? "var(--pico-form-element-valid-border-color)" : "inherit"); cursor: pointer;" title="Upvote" aria-label="Upvote">
                 <span class="fas fa-arrow-up" />
             </button>
         </form>
         <form asp-controller="Home" asp-action="Downvote" method="post" hx-post="@Url.Action("Downvote", "Home")" hx-target="#vote-controls-@Model.ContentId" hx-swap="outerHTML" style="margin: 0; padding: 0;">
             <input type="hidden" name="contentId" value="@Model.ContentId" />
             <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
-            <button type="submit" class="@(Model.UserVote == VoteType.Downvote ? "secondary" : "secondary outline")" style="margin: 0; padding: 0.5rem 0.75rem;" title="Downvote" aria-label="Downvote">
+            <button type="submit" style="margin: 0; padding: 0.5rem 0.75rem; background: none; border: none; color: @(Model.UserVote == VoteType.Downvote ? "var(--pico-form-element-invalid-border-color)" : "inherit"); cursor: pointer;" title="Downvote" aria-label="Downvote">
                 <span class="fas fa-arrow-down" />
             </button>
         </form>
     }
     else
     {
-        <button disabled class="secondary outline" style="margin: 0; padding: 0.5rem 0.75rem;" title="Upvote (login to vote)" aria-label="Upvote (login to vote)"><span class="fas fa-arrow-up" /></button>
-        <button disabled class="secondary outline" style="margin: 0; padding: 0.5rem 0.75rem;" title="Downvote (login to vote)" aria-label="Downvote (login to vote)"><span class="fas fa-arrow-down" /></button>
+        <button disabled style="margin: 0; padding: 0.5rem 0.75rem; background: none; border: none; color: var(--pico-muted-color); cursor: not-allowed;" title="Upvote (login to vote)" aria-label="Upvote (login to vote)"><span class="fas fa-arrow-up" /></button>
+        <button disabled style="margin: 0; padding: 0.5rem 0.75rem; background: none; border: none; color: var(--pico-muted-color); cursor: not-allowed;" title="Downvote (login to vote)" aria-label="Downvote (login to vote)"><span class="fas fa-arrow-down" /></button>
     }
 </div>

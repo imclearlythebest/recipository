@@ -33,7 +33,7 @@ public class CheckoutController : Controller
     if (!items.Any()) return RedirectToAction("Index", "Marketplace");
 
     float subtotal = items.Sum(x => x.Subtotal);
-    float discount = subtotal > 50.0f ? subtotal * 0.10f : 0f;
+    float discount = subtotal > 5000.0f ? subtotal * 0.10f : 0f;
 
     ViewBag.Subtotal = subtotal;
     ViewBag.Discount = discount;
@@ -57,7 +57,7 @@ public class CheckoutController : Controller
     if (user == null) return RedirectToAction("Login", "Auth");
 
     float subtotal = items.Sum(x => x.Subtotal);
-    float discount = subtotal > 50.0f ? subtotal * 0.10f : 0f;
+    float discount = subtotal > 5000.0f ? subtotal * 0.10f : 0f;
     float finalTotal = subtotal - discount;
 
     // Create the Order
@@ -91,7 +91,7 @@ public class CheckoutController : Controller
             await _revenueService.RecordRevenueAsync(orderItem.RecipeId.Value, orderItem.Id, itemTotal);
         }
     }
-    
+
     await _context.SaveChangesAsync();
 
     return View("Success", order.Id);

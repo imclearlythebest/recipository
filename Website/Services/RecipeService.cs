@@ -38,6 +38,7 @@ public class RecipeService : IRecipeService
         var recipe = new Recipe
         {
             Title = dto.Title,
+            CoverImageUrl = dto.CoverImageUrl,
             MainText = dto.MainText,
             Instructions = dto.Instructions,
             PrepTime = dto.PrepTime,
@@ -165,6 +166,7 @@ public class RecipeService : IRecipeService
 
         // Update fields
         recipe.Title = dto.Title;
+        recipe.CoverImageUrl = dto.CoverImageUrl;
         recipe.MainText = dto.MainText;
         recipe.Instructions = dto.Instructions;
         recipe.PrepTime = dto.PrepTime;
@@ -293,6 +295,7 @@ public class RecipeService : IRecipeService
         {
             Id = recipe.Id,
             Title = recipe.Title,
+            CoverImageUrl = recipe.CoverImageUrl,
             MainText = recipe.MainText,
             Instructions = recipe.Instructions,
             PrepTime = recipe.PrepTime,
@@ -305,6 +308,7 @@ public class RecipeService : IRecipeService
             PublishedAt = recipe.PublishedAt,
             AuthorId = recipe.ApplicationUserId,
             AuthorName = recipe.Author?.DisplayName ?? recipe.Author?.UserName ?? "Anonymous",
+            RejectionReason = recipe.RejectionReason,
             Ingredients = ingredients
         };
     }

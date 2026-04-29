@@ -4,18 +4,96 @@
 @inject UserManager<ApplicationUser> UserManager
 
 @{
-	var currentUser = await UserManager.GetUserAsync(User);
-	var pendingReviewCount = currentUser == null
-		? 0
-		: await DbContext.RecipeReviewRequests.CountAsync(r => r.ApplicationUserId == currentUser.Id);
+    var currentUser = await UserManager.GetUserAsync(User);
+    var pendingReviewCount = currentUser == null
+        ? 0
+        : await DbContext.RecipeReviewRequests.CountAsync(r => r.ApplicationUserId == currentUser.Id);
 }
 
-@if (User.Identity?.IsAuthenticated == true)
-{
-	<nav>
-		<ul>
-			<li><a asp-controller="Collections" asp-action="Index">Collections</a></li>
-			<li><a asp-controller="Home" asp-action="Reviews">Reviews (@pendingReviewCount)</a></li>
-		</ul>
-	</nav>
-}
+<nav class="left-sidebar-nav">
+    <ul style="padding:0; margin:0; list-style:none;">
+        <li><small class="text-muted" style="display: block; padding: 0.5rem 0.75rem; letter-spacing: 0.05em; font-weight: bold;">GENERAL</small></li>
+        <li>
+            <a asp-controller="Home" asp-action="Index">
+                <i class="fa-solid fa-house"></i> Home
+            </a>
+        </li>
+        <li>
+            <a asp-controller="Marketplace" asp-action="Index">
+                <i class="fa-solid fa-shop"></i> Marketplace
+            </a>
+        </li>
+        <li>
+            <a asp-controller="Cart" asp-action="Index">
+                <i class="fa-solid fa-cart-shopping"></i> Cart
+            </a>
+        </li>
+        <li>
+            <a asp-controller="Order" asp-action="Index">
+                <i class="fa-solid fa-receipt"></i> Orders
+            </a>
+        </li>
+
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <li style="margin-top:1.5rem;"><small class="text-muted" style="display: block; padding: 0.5rem 0.75rem; letter-spacing: 0.05em; font-weight: bold;">MY CONTENT</small></li>
+            <li>
+                <a asp-controller="Recipe" asp-action="Create">
+                    <i class="fa-solid fa-plus"></i> Create Recipe
+                </a>
+            </li>
+            <li>
+                <a asp-controller="Recipe" asp-action="MyDrafts">
+                    <i class="fa-solid fa-pen-to-square"></i> My Drafts
+                </a>
+            </li>
+            <li>
+                <a asp-controller="Collections" asp-action="Index">
+                    <i class="fa-solid fa-bookmark"></i> Collections
+                </a>
+            </li>
+            <li>
+                <a asp-controller="Home" asp-action="Reviews">
+                    <i class="fa-solid fa-star-half-stroke"></i> Reviews (@pendingReviewCount)
+                </a>
+            </li>
+            <li>
+                <a asp-controller="User" asp-action="Wallet">
+                    <i class="fa-solid fa-wallet"></i> My Wallet
+                </a>
+            </li>
+        }
+
+        @if (User.IsInRole("Admin"))
+        {
+            <li style="margin-top:1.5rem;"><small class="text-muted" style="display: block; padding: 0.5rem 0.75rem; letter-spacing: 0.05em; font-weight: bold;">ADMINISTRATION</small></li>
+            <partial name="_AdminLinks" />
+        }
+    </ul>
+</nav>
+
+<style>
+    .left-sidebar-nav a {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.375rem;
+        text-decoration: none;
+        color: var(--pico-color);
+        transition: all 0.2s ease-in-out;
+    }
+    .left-sidebar-nav a:hover {
+        background-color: var(--pico-primary);
+        color: var(--pico-primary-inverse) !important;
+    }
+    .left-sidebar-nav i {
+        width: 1.25rem;
+        text-align: center;
+        transition: transform 0.2s;
+    }
+    .left-sidebar-nav a:hover i {
+        color: var(--pico-primary-inverse) !important;
+        transform: scale(1.1);
+    }
+</style>

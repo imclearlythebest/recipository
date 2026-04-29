@@ -24,26 +24,33 @@ else
             ReturnUrl = Url.Action("Post", "Home", new { id = comment.ParentId }) ?? string.Empty
         };
         <article>
-            <header>
-                <a asp-controller="User" asp-action="Profile" asp-route-username="@comment.Author.UserName">
-                    <strong>@comment.Author.DisplayName</strong>
-                </a>
-                <time datetime="@comment.CreatedAt.ToUniversalTime():O">@comment.CreatedAt.ToLocalTime().ToString("g")</time>
+            <header style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; gap:1rem;">
+                <div style="min-width:0; flex:1;">
+                    <p class="text-muted" style="margin:0;">
+                        By <a asp-controller="User" asp-action="Profile" asp-route-username="@comment.Author.UserName" style="color:inherit; font-weight:bold;">@comment.Author.DisplayName</a> • <small>@comment.CreatedAt.ToLocalTime().ToString("g")</small>
+                    </p>
+                </div>
             </header>
             <p>@comment.MainText</p>
-            <footer style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
-                @await Html.PartialAsync("_VoteControls", vc)
-                @if (comment.Replies.Any())
-                {
-                    <button type="button" class="button secondary outline" onclick="window.location.href='@Url.Action("Comment", "Home", new { id = comment.Id })'" style="margin:0;padding:0.5rem 0.75rem;">Replies (@comment.Replies.Count)</button>
-                }
-                @* Always show Reply link for logged-in users *@
-                @if (currentUser != null)
-                {
-                    <button type="button" class="button secondary outline" onclick="window.location.href='@Url.Action("Comment", "Home", new { id = comment.Id })'" title="Reply" aria-label="Reply" style="margin:0;padding:0.5rem 0.75rem;">
-                        <span class="fas fa-reply"></span>
-                    </button>
-                }
+            <footer style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+                <div style="display:flex;gap:0.5rem;align-items:center;">
+                    @await Html.PartialAsync("_VoteControls", vc)
+                </div>
+                <div style="display:flex;gap:0.5rem;align-items:center;">
+                    @if (comment.Replies.Any())
+                    {
+                        <button type="button" style="background:none;border:none;color:inherit;cursor:pointer;margin:0;padding:0.5rem 0.75rem;" onclick="window.location.href='@(Url.Action("Comment", "Home", new { id = comment.Id }))'">
+                            <span class="fas fa-comment"></span> (@comment.Replies.Count)
+                        </button>
+                    }
+                    @* Always show Reply link for logged-in users *@
+                    @if (currentUser != null)
+                    {
+                        <button type="button" style="background:none;border:none;color:inherit;cursor:pointer;margin:0;padding:0.5rem 0.75rem;" onclick="window.location.href='@(Url.Action("Comment", "Home", new { id = comment.Id }))'" title="Reply" aria-label="Reply">
+                            <span class="fas fa-comment"></span>
+                        </button>
+                    }
+                </div>
             </footer>
         </article>
     }

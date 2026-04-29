@@ -5,18 +5,11 @@
     var history = ViewBag.History as List<Website.Models.Dtos.ApprovalHistoryDto> ?? new List<Website.Models.Dtos.ApprovalHistoryDto>();
 }
 
-<article>
-    <header>
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
-            <div>
-                <h1 style="margin-bottom: 0;">Review: @Model.Title</h1>
-                <p class="text-muted">By <strong>@Model.AuthorName</strong> • Submitted on @Model.CreatedAt.ToShortDateString()</p>
-            </div>
-            <div>
-                <span class="badge warning">Pending Approval</span>
-            </div>
-        </div>
-    </header>
+<article style="padding: 2.5rem;">
+    <h1 style="text-align:center; text-decoration:underline; margin-bottom:1rem;">@Model.Title</h1>
+    <div style="display:flex; justify-content:center; margin-bottom:2rem;">
+        <span class="badge warning">Pending Approval</span>
+    </div>
 
     @if (TempData["Error"] != null)
     {
@@ -25,47 +18,42 @@
         </div>
     }
 
-    <div class="grid" style="margin-bottom: 2rem;">
-        <div>
-            <strong>⏱️ Prep:</strong> @Model.PrepTime min
-        </div>
-        <div>
-            <strong>🔥 Cook:</strong> @Model.CookTime min
-        </div>
-        <div>
-            <strong>👥 Serves:</strong> @Model.ServingSize
-        </div>
-        <div>
-            <strong>⭐ Difficulty:</strong> @Model.Difficulty
-        </div>
-    </div>
+    <h4 style="margin-bottom:0.75rem;">Summary</h4>
+    <p style="line-height:1.7; margin:0 0 1.5rem 0;">@Model.MainText</p>
 
-    <section>
-        <h3>Overview</h3>
-        <p>@Model.MainText</p>
-    </section>
+    <h4 style="margin-bottom:0.75rem;">At a Glance</h4>
+    <ul style="margin:0 0 1.5rem 1.25rem; padding:0; line-height:1.8;">
+        <li><strong>Prep Time:</strong> @Model.PrepTime minutes</li>
+        <li><strong>Cook Time:</strong> @Model.CookTime minutes</li>
+        <li><strong>Servings:</strong> @Model.ServingSize</li>
+        <li><strong>Difficulty:</strong> @Model.Difficulty</li>
+        <li><strong>Estimated Calories:</strong> @Math.Round(Model.EstimatedCalories) cal</li>
+    </ul>
 
-    <div class="grid">
-        <section>
-            <h3>Ingredients</h3>
-            <ul>
-                @foreach (var ing in Model.Ingredients)
-                {
-                    <li>
-                        <strong>@ing.IngredientName</strong>: @ing.Quantity @ing.Unit 
-                        <small class="text-muted">(@Math.Round(ing.TotalCalories) cal)</small>
-                    </li>
-                }
-            </ul>
-            <div style="background: var(--pico-card-background-color); padding: 1rem; border-radius: var(--pico-border-radius);">
-                <strong>Total Estimated Calories:</strong> @Math.Round(Model.EstimatedCalories) cal
-            </div>
-        </section>
+    <hr style="margin:1.5rem 0;">
 
-        <section>
-            <h3>Instructions</h3>
-            <div style="white-space: pre-wrap;">@Model.Instructions</div>
-        </section>
+    <h4 style="margin-bottom:0.75rem;">Ingredients</h4>
+    <ul style="margin:0 0 1rem 1.25rem; padding:0; line-height:1.8;">
+        @foreach (var ing in Model.Ingredients)
+        {
+            <li style="margin-bottom:0.5rem;">
+                <strong>@ing.IngredientName</strong> — @ing.Quantity @ing.Unit
+                <span style="color: var(--pico-muted-color); font-size:0.9rem;">(@Math.Round(ing.TotalCalories) cal)</span>
+            </li>
+        }
+    </ul>
+
+
+
+    <hr style="margin:1.5rem 0;">
+
+    <h4 style="margin-bottom:0.75rem;">Instructions</h4>
+    <div style="white-space: pre-wrap; line-height:1.8;">@Model.Instructions</div>
+
+    <div style="text-align: right; margin-top: 2rem;">
+        <p class="text-muted" style="margin:0;">
+            Recipe by <strong>@Model.AuthorName</strong> • <small>Submitted on @Model.CreatedAt.ToShortDateString()</small>
+        </p>
     </div>
 
     @if (history.Any())

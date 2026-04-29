@@ -8,6 +8,7 @@
   <link rel="icon" type="image/svg+xml" href="/images/utensils-solid-full.svg">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="/css/pico.sand.min.css">
+  <link rel="stylesheet" href="/css/pico.colors.min.css">
   <link rel="stylesheet" href="/css/style.css" asp-append-version="true">
   <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js" integrity="sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz" crossorigin="anonymous"></script>
   @RenderSection("Styles", required: false)
@@ -17,32 +18,16 @@
 <body>
   <partial name="_Header" />
 
-  <div class="middle @(ViewData["LayoutType"]?.ToString() == "RightOnly" ? "right-only" : "")">
-    @if (ViewData["LayoutType"]?.ToString() != "RightOnly")
+  <div class="middle @(ViewData["LayoutType"]?.ToString() == "SingleSidebar" ? "single-sidebar" : "")">
+    @if (ViewData["LayoutType"]?.ToString() == "SingleSidebar")
     {
       <aside>
-        <nav>
-          <ul>
-            <li><a asp-controller="Home" asp-action="Index">Home</a></li>
-            <li><a asp-controller="Marketplace" asp-action="Index">Marketplace</a></li>
-            <li><a asp-controller="Cart" asp-action="Index">Cart</a></li>
-            
-            <li><a asp-controller="Order" asp-action="Index">Orders</a></li>
-            
-            @if (User.Identity?.IsAuthenticated == true)
-            {
-              <li><hr /></li>
-              <li><strong>Recipe Management</strong></li>
-              <li><a asp-controller="Recipe" asp-action="Create">Create Recipe</a></li>
-              <li><a asp-controller="Recipe" asp-action="MyDrafts">My Drafts</a></li>
-            }
-
-            @if (User.IsInRole("Admin"))
-            {
-              <partial name="_AdminLinks" />
-            }
-          </ul>
-        </nav>
+        <partial name="_ContextSidebar" />
+      </aside>
+    }
+    else
+    {
+      <aside>
         <partial name="_LeftSidebar" />
       </aside>
     }
@@ -51,9 +36,12 @@
       @RenderBody()
     </main>
 
-    <aside>
-      <partial name="_RightSidebar" />
-    </aside>
+    @if (ViewData["LayoutType"]?.ToString() != "SingleSidebar")
+    {
+      <aside>
+        <partial name="_ContextSidebar" />
+      </aside>
+    }
   </div>
   <script src="/js/script.js"></script>
   @RenderSection("Scripts", required: false)

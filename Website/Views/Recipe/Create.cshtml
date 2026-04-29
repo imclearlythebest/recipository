@@ -24,6 +24,11 @@
                 <input type="text" id="Title" name="Title" placeholder="e.g., Authentic Italian Lasagna" required minlength="5" maxlength="200">
                 <small>A catchy title helps your recipe stand out.</small>
             </div>
+            <div>
+                <label for="CoverImageUrl">Cover Image URL</label>
+                <input type="url" id="CoverImageUrl" name="CoverImageUrl" placeholder="https://example.com/image.jpg">
+                <small>Provide a high-quality image URL for your recipe.</small>
+            </div>
         </div>
 
         <label for="MainText">Short Description *</label>
@@ -79,9 +84,9 @@
             </button>
         </fieldset>
 
-        <footer style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
-            <a asp-action="Index" asp-controller="Home" class="outline secondary" role="button">Cancel</a>
-            <button type="submit" class="primary">Save as Draft</button>
+        <footer style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end; align-items: stretch;">
+            <a asp-action="Index" asp-controller="Home" class="outline secondary" role="button" style="margin: 0; display: flex; align-items: center; justify-content: center; min-width: 120px;">Cancel</a>
+            <button type="submit" class="primary" style="margin: 0; min-width: 150px;">Save as Draft</button>
         </footer>
     </form>
 </article>

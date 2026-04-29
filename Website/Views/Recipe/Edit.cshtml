@@ -27,6 +27,10 @@
                 <label for="Title">Recipe Title *</label>
                 <input type="text" id="Title" name="Title" value="@Model.Title" required minlength="5" maxlength="200">
             </div>
+            <div>
+                <label for="CoverImageUrl">Cover Image URL</label>
+                <input type="url" id="CoverImageUrl" name="CoverImageUrl" value="@Model.CoverImageUrl" placeholder="https://example.com/image.jpg">
+            </div>
         </div>
 
         <label for="MainText">Short Description *</label>
@@ -87,9 +91,9 @@
             </button>
         </fieldset>
 
-        <footer style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
-            <a asp-action="MyDrafts" class="outline secondary" role="button">Cancel</a>
-            <button type="submit" class="primary">Update Recipe</button>
+        <footer style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end; align-items: stretch;">
+            <a asp-action="MyDrafts" class="outline secondary" role="button" style="margin: 0; display: flex; align-items: center; justify-content: center; min-width: 120px;">Cancel</a>
+            <button type="submit" class="primary" style="margin: 0; min-width: 150px;">Update Recipe</button>
         </footer>
     </form>
 </article>
