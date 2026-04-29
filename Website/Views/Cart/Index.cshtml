@@ -5,6 +5,11 @@
 }
 
 <main class="container" id="cart-container">
+  @if (ViewBag.Toast != null)
+  {
+      @Html.Raw(ViewBag.Toast)
+  }
+  <div id="cart-toast"></div>
   <article>
     <header>
       <hgroup>

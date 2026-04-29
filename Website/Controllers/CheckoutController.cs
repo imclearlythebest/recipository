@@ -1,10 +1,13 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Website.Data;
 using Website.Models;
 
 namespace Website.Controllers;
 
+[Authorize]
 public class CheckoutController : Controller
 {
   private readonly AppDbContext _context;
@@ -16,9 +19,14 @@ public class CheckoutController : Controller
     _userManager = userManager;
   }
 
-  public IActionResult Index()
+  public async Task<IActionResult> Index()
   {
-    var items = CartController.GetCartItems();
+    var userId = _userManager.GetUserId(User);
+    var items = await _context.CartItems
+      .Include(c => c.Product)
+      .Where(c => c.ApplicationUserId == userId)
+      .ToListAsync();
+
     if (!items.Any()) return RedirectToAction("Index", "Marketplace");
 
     float subtotal = items.Sum(x => x.Subtotal);
@@ -34,10 +42,15 @@ public class CheckoutController : Controller
   [HttpPost]
   public async Task<IActionResult> PlaceOrder()
   {
-    var items = CartController.GetCartItems();
+    var userId = _userManager.GetUserId(User);
+    var items = await _context.CartItems
+      .Include(c => c.Product)
+      .Where(c => c.ApplicationUserId == userId)
+      .ToListAsync();
+
     if (!items.Any()) return RedirectToAction("Index", "Marketplace");
 
-    var user = await _userManager.GetUserAsync(User);
+    var user = await _userManager.FindByIdAsync(userId!);
     if (user == null) return RedirectToAction("Login", "Auth");
 
     float subtotal = items.Sum(x => x.Subtotal);
@@ -59,10 +72,11 @@ public class CheckoutController : Controller
     };
 
     _context.Orders.Add(order);
+    
+    // Clear the cart items from database
+    _context.CartItems.RemoveRange(items);
+    
     await _context.SaveChangesAsync();
-
-    // Clear the cart after successful order
-    CartController.ClearCart();
 
     return View("Success", order.Id);
   }

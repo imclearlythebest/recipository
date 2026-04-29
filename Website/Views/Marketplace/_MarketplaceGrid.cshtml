@@ -45,12 +45,23 @@
         }
         else
         {
-            <button class="primary" 
-                    style="margin: 0; font-size: 0.8rem;"
-                    hx-post="/Cart/AddToCart/@item.Id" 
-                    hx-swap="none">
-            Add to Cart
-            </button>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <button class="primary" 
+                        style="margin: 0; font-size: 0.8rem;"
+                        hx-post="/Cart/AddToCart/@item.Id" 
+                        hx-swap="none">
+                Add to Cart
+                </button>
+            }
+            else
+            {
+                <a href="/Auth/Login?ReturnUrl=/Marketplace" 
+                   class="button primary" 
+                   style="margin: 0; font-size: 0.8rem; text-decoration: none; display: inline-block;">
+                Add to Cart
+                </a>
+            }
         }
         </div>
     </footer>

@@ -20,10 +20,24 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
   public DbSet<RecipeReview> RecipeReviews => Set<RecipeReview>();
   public DbSet<Order> Orders => Set<Order>();
   public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+  public DbSet<CartItem> CartItems => Set<CartItem>();
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
     base.OnModelCreating(modelBuilder);
+
+    modelBuilder.Entity<CartItem>(entity =>
+    {
+      entity.HasOne(ci => ci.User)
+            .WithMany(u => u.CartItems)
+            .HasForeignKey(ci => ci.ApplicationUserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+      entity.HasOne(ci => ci.Product)
+            .WithMany()
+            .HasForeignKey(ci => ci.ShopItemId)
+            .OnDelete(DeleteBehavior.Cascade);
+    });
 
     modelBuilder.Entity<Ingredient>()
       .HasDiscriminator<string>("IngredientType")
@@ -132,7 +146,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
 
     // --- MARKETPLACE & INGREDIENT SEED ---
     modelBuilder.Entity<ShopItem>().HasData(
-      new ShopItem { Id = 1, Name = "Tomato", Description = "Red, juicy fruit", ImageUrl = "/images/tomato.jpg", Calories = 20, Price = 0.50f, Stock = 100, Moq = 1, Increment = 1, Type=IngredientType.Vegetable },
+      new ShopItem { Id = 1, Name = "Tomato", Description = "Red, juicy fruit", ImageUrl = "/images/tomato.jpg", Calories = 20, Price = 0.00f, Stock = 100, Moq = 1, Increment = 1, Type=IngredientType.Vegetable },
       new ShopItem { Id = 2, Name = "Onion", Description = "Pungent bulb", ImageUrl = "/images/onion.jpg", Calories = 40, Price = 0.30f, Stock = 50, Moq = 1, Increment = 1, Type=IngredientType.Vegetable },
       new ShopItem { Id = 3, Name = "Garlic", Description = "Strong-flavored bulb", ImageUrl = "/images/garlic.jpg", Calories = 30, Price = 0.20f, Stock = 100, Moq = 1, Increment = 1, Type=IngredientType.Spice },
       new ShopItem { Id = 4, Name = "Salt", Description = "Fine sea salt", ImageUrl = "/images/salt.jpg", Calories = 0, Price = 1.50f, Stock = 0, Moq = 1, Increment = 1, Type=IngredientType.Spice },
