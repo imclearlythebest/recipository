@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Website.Routes;
 using Website.Data;
 using Website.Models;
+using Website.Services;
 using Microsoft.AspNetCore.Identity;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=app.db"));
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>();
+builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Auth/Login";
