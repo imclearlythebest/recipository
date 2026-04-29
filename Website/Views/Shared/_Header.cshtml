@@ -12,7 +12,11 @@
     <ul>
       @if (User.Identity?.IsAuthenticated == true)
       {
-        <partial name="_AvatarMenu" />
+        <li>
+          <a asp-controller="User" asp-action="Profile" asp-route-username="@User.Identity.Name" title="Profile">
+            <i class="fas fa-circle-user"></i>
+          </a>
+        </li>
       }
       else
       {

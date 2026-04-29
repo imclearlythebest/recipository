@@ -47,16 +47,20 @@ body>header {
     height: 100%;
 }
 
+/* Sidebars */
 .middle>aside {
     width: 300px;
     flex-shrink: 0;
     padding: 1rem;
+}
+
+/* Default sidebar (on the left) */
+.middle>aside:first-of-type {
     border-right: 1px solid var(--pico-muted-border-color);
 }
 
-/* Right sidebar specific (if we want it different) */
-.middle>aside:last-of-type {
-    border-right: none;
+/* Second sidebar (on the right) */
+.middle>aside:nth-of-type(2) {
     border-left: 1px solid var(--pico-muted-border-color);
 }
 
@@ -79,10 +83,10 @@ aside select {
     border-radius: 6px;
 }
 
-/* Modifier: Right-only layout */
-.middle.right-only>aside:last-of-type {
+/* Modifier: Single-sidebar layout */
+.middle.single-sidebar>aside {
     width: 375px;
-    /* Bigger right sidebar as requested */
+    /* Bigger context sidebar when it's the only one */
 }
 
 /* Card Grid - keeping your existing style */
@@ -105,4 +109,24 @@ aside select {
     height: 80px;
     object-fit: cover;
     border-radius: 50%;
+}
+
+/* Normalize buttons and links styled as buttons */
+button,
+[role="button"],
+input[type="submit"],
+input[type="reset"],
+input[type="button"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    gap: 0.5rem;
+    height: auto;
+    min-height: calc(var(--pico-line-height) * 1em + var(--pico-form-element-spacing-vertical) * 2 + var(--pico-border-width) * 2);
+}
+
+.grid > button,
+.grid > [role="button"] {
+    width: 100%;
 }
