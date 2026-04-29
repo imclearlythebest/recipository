@@ -33,9 +33,14 @@
     
     <footer style="padding: 1rem; border-top: 1px solid var(--pico-muted-border-color);">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-weight: bold; font-size: 1.1rem;">
-            $@item.Price.ToString("F2")
-        </span>
+        <div style="display: flex; flex-direction: column; line-height: 1.2;">
+            <span style="font-weight: bold; font-size: 1.1rem;">
+                ৳@item.Price.ToString("F2")
+            </span>
+            <small style="font-weight: normal; font-size: 0.7rem; color: var(--pico-muted-color);">
+                @item.UnitName
+            </small>
+        </div>
         
         @if (isOutOfStock)
         {
