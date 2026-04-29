@@ -13,6 +13,9 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
   public DbSet<ShopItem> ShopItems => Set<ShopItem>();
   public DbSet<Content> Contents => Set<Content>();
   public DbSet<Recipe> Recipes => Set<Recipe>();
+  public DbSet<RecipeIngredient> RecipeIngredients => Set<RecipeIngredient>();
+  public DbSet<RecipeApproval> RecipeApprovals => Set<RecipeApproval>();
+  public DbSet<RecipeRevenue> RecipeRevenues => Set<RecipeRevenue>();
   public DbSet<ContentVote> ContentVotes => Set<ContentVote>();
   public DbSet<Follow> Follows => Set<Follow>();
   public DbSet<Collection> Collections => Set<Collection>();
@@ -148,7 +151,72 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
       entity.HasMany(r => r.Ingredients)
             .WithMany()
-            .UsingEntity(j => j.ToTable("RecipeIngredients"));
+            .UsingEntity<RecipeIngredient>(
+                join => join
+                    .HasOne(ri => ri.Ingredient)
+                    .WithMany()
+                    .HasForeignKey(ri => ri.IngredientId)
+                    .OnDelete(DeleteBehavior.Restrict),
+                join => join
+                    .HasOne(ri => ri.Recipe)
+                    .WithMany(r => r.RecipeIngredients)
+                    .HasForeignKey(ri => ri.RecipeId)
+                    .OnDelete(DeleteBehavior.Cascade),
+                join =>
+                {
+                    join.HasKey(ri => ri.Id);
+                    join.ToTable("RecipeIngredients");
+                });
+    });
+
+    modelBuilder.Entity<RecipeIngredient>(entity =>
+    {
+      entity.HasKey(ri => ri.Id);
+      entity.HasOne(ri => ri.Recipe)
+            .WithMany(r => r.RecipeIngredients)
+            .HasForeignKey(ri => ri.RecipeId)
+            .OnDelete(DeleteBehavior.Cascade);
+      entity.HasOne(ri => ri.Ingredient)
+            .WithMany()
+            .HasForeignKey(ri => ri.IngredientId)
+            .OnDelete(DeleteBehavior.Restrict);
+    });
+
+    modelBuilder.Entity<RecipeApproval>(entity =>
+    {
+      entity.HasKey(ra => ra.Id);
+      entity.HasOne(ra => ra.Recipe)
+            .WithMany(r => r.ApprovalHistory)
+            .HasForeignKey(ra => ra.RecipeId)
+            .OnDelete(DeleteBehavior.Cascade);
+      entity.HasOne(ra => ra.ApprovedBy)
+            .WithMany()
+            .HasForeignKey(ra => ra.ApprovedByUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+    });
+
+    modelBuilder.Entity<RecipeRevenue>(entity =>
+    {
+      entity.HasKey(rr => rr.Id);
+      entity.HasOne(rr => rr.Recipe)
+            .WithMany(r => r.Revenues)
+            .HasForeignKey(rr => rr.RecipeId)
+            .OnDelete(DeleteBehavior.Cascade);
+      entity.HasOne(rr => rr.OrderItem)
+            .WithMany()
+            .HasForeignKey(rr => rr.OrderItemId)
+            .OnDelete(DeleteBehavior.Restrict);
+      entity.Property(rr => rr.Amount).HasPrecision(18, 2);
+      entity.Property(rr => rr.AuthorShare).HasPrecision(18, 2);
+      entity.Property(rr => rr.PlatformShare).HasPrecision(18, 2);
+    });
+
+    modelBuilder.Entity<OrderItem>(entity =>
+    {
+        entity.HasOne<Recipe>()
+              .WithMany()
+              .HasForeignKey(oi => oi.RecipeId)
+              .OnDelete(DeleteBehavior.SetNull);
     });
 
     // --- MARKETPLACE & INGREDIENT SEED ---
@@ -164,9 +232,9 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     string adminUserId = "b74ddd14-6340-4840-95c2-db12554843e5"; // Fixed GUID
 
     modelBuilder.Entity<Recipe>().HasData(
-      new Recipe { Id = 1, Title = "How To Make Souvlaki", MainText = "This is some content.", CreatedAt = new DateTime(2024, 6, 1), ApplicationUserId = adminUserId },
-      new Recipe { Id = 2, Title = "Bongoposhagor-ian Dish", MainText = "This is some more content.", CreatedAt = new DateTime(2024, 6, 2), ApplicationUserId = adminUserId },
-      new Recipe { Id = 3, Title = "How To Make Bhelpuri", MainText = "This is even more content.", CreatedAt = new DateTime(2024, 6, 3), ApplicationUserId = adminUserId }
+      new Recipe { Id = 1, Title = "How To Make Souvlaki", MainText = "This is some content.", Instructions = "1. Marinate meat, 2. Grill meat.", CreatedAt = new DateTime(2024, 6, 1), ApplicationUserId = adminUserId, PrepTime = 30, CookTime = 20, ServingSize = 4, Status = "Published" },
+      new Recipe { Id = 2, Title = "Bongoposhagor-ian Dish", MainText = "This is some more content.", Instructions = "1. Mix ingredients, 2. Steam.", CreatedAt = new DateTime(2024, 6, 2), ApplicationUserId = adminUserId, PrepTime = 15, CookTime = 10, ServingSize = 2, Status = "Published" },
+      new Recipe { Id = 3, Title = "How To Make Bhelpuri", MainText = "This is even more content.", Instructions = "1. Toss ingredients, 2. Serve.", CreatedAt = new DateTime(2024, 6, 3), ApplicationUserId = adminUserId, PrepTime = 10, CookTime = 0, ServingSize = 1, Status = "Published" }
     );
 
     modelBuilder.Entity<IdentityRole>().HasData(new IdentityRole

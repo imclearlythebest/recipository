@@ -1,0 +1,102 @@
+@model Website.Models.Dtos.RecipeResponseDto
+
+@{
+    ViewData["Title"] = Model.Title;
+    var shopItems = ViewBag.ShopItems as Dictionary<int, float> ?? new Dictionary<int, float>();
+}
+
+<article>
+    <header>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h1 style="margin-bottom: 0;">@Model.Title</h1>
+                <p class="text-muted">By <strong>@Model.AuthorName</strong> • @Model.CreatedAt.ToShortDateString()</p>
+            </div>
+            <div>
+                @if (Model.Status == "Draft")
+                {
+                    <span class="badge secondary">Draft</span>
+                }
+                else if (Model.Status == "PendingApproval")
+                {
+                    <span class="badge warning">Pending Approval</span>
+                }
+                else if (Model.Status == "Published")
+                {
+                    <span class="badge success">Published</span>
+                }
+            </div>
+        </div>
+    </header>
+
+    @* Target for cart feedback *@
+    <div id="cart-toast"></div>
+
+    <div class="grid" style="margin-bottom: 2rem;">
+        <div>
+            <strong>⏱️ Prep:</strong> @Model.PrepTime min
+        </div>
+        <div>
+            <strong>🔥 Cook:</strong> @Model.CookTime min
+        </div>
+        <div>
+            <strong>👥 Serves:</strong> @Model.ServingSize
+        </div>
+        <div>
+            <strong>⭐ Difficulty:</strong> @Model.Difficulty
+        </div>
+    </div>
+
+    <section>
+        <h3>Overview</h3>
+        <p>@Model.MainText</p>
+    </section>
+
+    <div class="grid">
+        <section>
+            <h3>Ingredients</h3>
+            <ul>
+                @foreach (var ing in Model.Ingredients)
+                {
+                    <li style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <span>
+                            <strong>@ing.IngredientName</strong>: @ing.Quantity @ing.Unit 
+                            <small class="text-muted">(@Math.Round(ing.TotalCalories) cal)</small>
+                        </span>
+                        
+                        @if (shopItems.ContainsKey(ing.IngredientId))
+                        {
+                            <button class="outline primary" 
+                                    style="padding: 2px 8px; margin: 0; font-size: 0.8rem; width: auto;"
+                                    hx-post="/Cart/AddToCart/@ing.IngredientId?recipeId=@Model.Id"
+                                    hx-swap="none"
+                                    title="Add to Cart - $@shopItems[ing.IngredientId].ToString("F2")">
+                                <i class="fa-solid fa-cart-plus"></i>
+                            </button>
+                        }
+                    </li>
+                }
+            </ul>
+            <div class="alert info" style="background: var(--pico-card-background-color); padding: 1rem; border-radius: var(--pico-border-radius);">
+                <strong>Total Estimated Calories:</strong> @Math.Round(Model.EstimatedCalories) cal
+            </div>
+        </section>
+
+        <section>
+            <h3>Instructions</h3>
+            <div style="white-space: pre-wrap;">@Model.Instructions</div>
+        </section>
+    </div>
+
+    @if (Model.AuthorId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value && Model.Status == "Draft")
+    {
+        <footer>
+            <div class="grid">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="button outline primary">Edit Recipe</a>
+                <form asp-action="Submit" asp-route-id="@Model.Id" method="post" style="margin:0;">
+                    <button type="submit" class="outline contrast">Submit for Approval</button>
+                </form>
+            </div>
+        </footer>
+    }
+</article>

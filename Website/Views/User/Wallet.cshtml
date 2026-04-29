@@ -1,0 +1,76 @@
+@model List<Website.Models.Dtos.RevenueTransactionDto>
+
+@{
+    ViewData["Title"] = "Creator Wallet";
+    decimal totalRevenue = ViewBag.TotalRevenue ?? 0m;
+}
+
+<article>
+    <header>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h1>Creator Wallet</h1>
+                <p>Manage and track your earnings from recipe-driven sales.</p>
+            </div>
+            <div style="background: var(--pico-card-background-color); padding: 1.5rem; border-radius: var(--pico-border-radius); border: 2px solid var(--pico-primary-background); text-align: center;">
+                <small style="text-transform: uppercase; letter-spacing: 1px; color: var(--pico-muted-color);">Total Earnings</small>
+                <h2 style="margin: 0; color: var(--pico-primary-background);">$@totalRevenue.ToString("F2")</h2>
+            </div>
+        </div>
+    </header>
+
+    <section style="margin-top: 2rem;">
+        <h3>Transaction History</h3>
+        
+        @if (Model.Count == 0)
+        {
+            <div style="text-align: center; padding: 3rem 0; border: 1px dashed var(--pico-muted-border-color); border-radius: var(--pico-border-radius);">
+                <i class="fa-solid fa-coins" style="font-size: 3rem; color: var(--pico-muted-color); margin-bottom: 1rem; display: block;"></i>
+                <p>No transactions yet. Share your recipes and earn when users buy ingredients!</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="striped">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Recipe</th>
+                            <th>Sale Amount</th>
+                            <th>Your Share (70%)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var tx in Model)
+                        {
+                            <tr>
+                                <td>@tx.TransactionDate.ToShortDateString()</td>
+                                <td><strong>@tx.RecipeTitle</strong></td>
+                                <td>$@tx.TotalAmount.ToString("F2")</td>
+                                <td style="color: var(--pico-primary-background); font-weight: bold;">$@tx.AuthorShare.ToString("F2")</td>
+                                <td>
+                                    @if (tx.Status == "Completed")
+                                    {
+                                        <span class="badge success">Completed</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge secondary">@tx.Status</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+
+    <footer style="margin-top: 2rem;">
+        <div class="alert info" style="background: var(--pico-card-background-color); padding: 1rem; border-radius: var(--pico-border-radius);">
+            <i class="fa-solid fa-circle-info"></i> Revenue is calculated as 70% of the ingredient sale price for any order originating from your recipe posts.
+        </div>
+    </footer>
+</article>

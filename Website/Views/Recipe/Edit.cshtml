@@ -1,0 +1,133 @@
+@using Website.Models.Dtos
+@model RecipeResponseDto
+
+@{
+    ViewData["Title"] = "Edit Recipe";
+    var availableIngredients = ViewBag.Ingredients as List<Website.Models.Ingredient> ?? new List<Website.Models.Ingredient>();
+}
+
+<article>
+    <header>
+        <h1>Edit Recipe: @Model.Title</h1>
+        <p>Current Status: <mark>@Model.Status</mark></p>
+    </header>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger" style="color: var(--pico-form-element-invalid-border-color); margin-bottom: 1rem;">
+            <i class="fa-solid fa-circle-exclamation"></i> @TempData["Error"]
+        </div>
+    }
+
+    <form asp-action="Edit" method="post">
+        <input type="hidden" name="Id" value="@Model.Id" />
+        
+        <div class="grid">
+            <div>
+                <label for="Title">Recipe Title *</label>
+                <input type="text" id="Title" name="Title" value="@Model.Title" required minlength="5" maxlength="200">
+            </div>
+        </div>
+
+        <label for="MainText">Short Description *</label>
+        <textarea id="MainText" name="MainText" required minlength="10" maxlength="2000">@Model.MainText</textarea>
+
+        <label for="Instructions">Cooking Instructions *</label>
+        <textarea id="Instructions" name="Instructions" rows="10" required minlength="20" maxlength="5000">@Model.Instructions</textarea>
+
+        <div class="grid">
+            <div>
+                <label for="Difficulty">Difficulty</label>
+                <select id="Difficulty" name="Difficulty">
+                    <option value="Easy" selected='@(Model.Difficulty == "Easy")'>Easy</option>
+                    <option value="Medium" selected='@(Model.Difficulty == "Medium")'>Medium</option>
+                    <option value="Hard" selected='@(Model.Difficulty == "Hard")'>Hard</option>
+                </select>
+            </div>
+            <div>
+                <label for="ServingSize">Servings</label>
+                <input type="number" id="ServingSize" name="ServingSize" value="@Model.ServingSize" min="1" max="100">
+            </div>
+        </div>
+
+        <div class="grid">
+            <div>
+                <label for="PrepTime">Prep Time (mins)</label>
+                <input type="number" id="PrepTime" name="PrepTime" value="@Model.PrepTime" min="0" max="480">
+            </div>
+            <div>
+                <label for="CookTime">Cook Time (mins)</label>
+                <input type="number" id="CookTime" name="CookTime" value="@Model.CookTime" min="0" max="480">
+            </div>
+        </div>
+
+        <fieldset>
+            <legend>Ingredients</legend>
+            <div id="ingredients-list">
+                @for (int i = 0; i < Model.Ingredients.Count; i++)
+                {
+                    var item = Model.Ingredients[i];
+                    // We need the original IngredientId which is not in RecipeIngredientDto? 
+                    // Let's check RecipeIngredientDto definition.
+                    <div class="ingredient-row grid" style="margin-bottom: 0.5rem;">
+                        <select name="Ingredients[@i].IngredientId" required>
+                            @foreach (var ing in availableIngredients)
+                            {
+                                <option value="@ing.Id" selected='@(ing.Id == item.IngredientId)'>@ing.Name (@ing.Calories cal/100g)</option>
+                            }
+                        </select>
+                        <input type="number" name="Ingredients[@i].Quantity" value="@item.Quantity" step="0.1" placeholder="Qty" required min="0.1" max="10000">
+                        <input type="text" name="Ingredients[@i].Unit" value="@item.Unit" placeholder="Unit" required maxlength="50">
+                        <button type="button" class="outline secondary remove-ingredient" style="width: auto;"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                }
+            </div>
+            <button type="button" id="add-ingredient" class="outline contrast" style="margin-top: 1rem;">
+                <i class="fa-solid fa-plus"></i> Add Ingredient
+            </button>
+        </fieldset>
+
+        <footer style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
+            <a asp-action="MyDrafts" class="outline secondary" role="button">Cancel</a>
+            <button type="submit" class="primary">Update Recipe</button>
+        </footer>
+    </form>
+</article>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let ingredientIndex = @Model.Ingredients.Count;
+            const ingredientsList = document.getElementById('ingredients-list');
+            const addBtn = document.getElementById('add-ingredient');
+
+            addBtn.addEventListener('click', function() {
+                const firstRow = document.querySelector('.ingredient-row');
+                const newRow = firstRow.cloneNode(true);
+                
+                newRow.querySelectorAll('select, input').forEach(input => {
+                    const name = input.getAttribute('name');
+                    input.setAttribute('name', name.replace(/\[\d+\]/, `[${ingredientIndex}]`));
+                    if(input.tagName === 'INPUT') input.value = '';
+                });
+
+                ingredientsList.appendChild(newRow);
+                ingredientIndex++;
+                attachRemoveEvent(newRow.querySelector('.remove-ingredient'));
+            });
+
+            function attachRemoveEvent(btn) {
+                btn.addEventListener('click', function() {
+                    const rows = document.querySelectorAll('.ingredient-row');
+                    if (rows.length > 1) {
+                        btn.closest('.ingredient-row').remove();
+                    } else {
+                        alert('At least one ingredient is required.');
+                    }
+                });
+            }
+
+            document.querySelectorAll('.remove-ingredient').forEach(btn => attachRemoveEvent(btn));
+        });
+    </script>
+}

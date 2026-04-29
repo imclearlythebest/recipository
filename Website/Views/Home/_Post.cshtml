@@ -42,6 +42,7 @@
             <button type="button" class="secondary outline" onclick="window.location.href='@Url.Action("Post", "Home", new { id = Model.Id })'" title="Comments" style="margin: 0; padding: 0.5rem 0.75rem;">
                 <span class="fas fa-comment"></span>
             </button>
+            <a asp-controller="Home" asp-action="Post" asp-route-id="@Model.Id" class="button outline primary" style="margin: 0; padding: 0.5rem 1rem;">View Recipe</a>
 
             @if (currentUser != null)
             {

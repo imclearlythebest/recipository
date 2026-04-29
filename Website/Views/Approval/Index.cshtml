@@ -1,0 +1,63 @@
+@model List<Website.Models.Dtos.PendingRecipeDto>
+
+@{
+    ViewData["Title"] = "Pending Approvals";
+}
+
+<article>
+    <header>
+        <h1>Pending Recipe Approvals</h1>
+        <p>Review and publish recipes from our community.</p>
+    </header>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success" style="color: var(--pico-form-element-valid-border-color); margin-bottom: 1rem;">
+            <i class="fa-solid fa-circle-check"></i> @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger" style="color: var(--pico-form-element-invalid-border-color); margin-bottom: 1rem;">
+            <i class="fa-solid fa-circle-exclamation"></i> @TempData["Error"]
+        </div>
+    }
+
+    @if (Model.Count == 0)
+    {
+        <div style="text-align: center; padding: 3rem 0;">
+            <i class="fa-solid fa-check-double" style="font-size: 4rem; color: var(--pico-muted-color); margin-bottom: 1rem; display: block;"></i>
+            <h3>All caught up!</h3>
+            <p>There are no recipes pending approval at the moment.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="striped">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Submitted</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var recipe in Model)
+                    {
+                        <tr>
+                            <td><strong>@recipe.Title</strong></td>
+                            <td>@recipe.AuthorName</td>
+                            <td>@recipe.CreatedAt.ToShortDateString()</td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@recipe.Id" class="button outline primary" style="padding: 0.25rem 0.5rem;">Review</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</article>

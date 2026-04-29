@@ -10,5 +10,6 @@ public class CartItem
   public string ApplicationUserId { get; set; } = string.Empty;
   public ApplicationUser? User { get; set; }
 
+  public int? OriginatingRecipeId { get; set; }
   public float Subtotal => (Product?.Price ?? 0) * Quantity;
 }

@@ -4,6 +4,14 @@
 
 @model List<Recipe>
 
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h1 style="margin: 0;">Latest Recipes</h1>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <a asp-controller="Recipe" asp-action="Create" class="button primary">Create Recipe</a>
+    }
+</div>
+
 <div id="cart-toast"></div>
 
 <div id="home-feed">

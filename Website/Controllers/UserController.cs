@@ -4,14 +4,23 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Website.Data;
 using Website.Models;
+using Website.Services;
 
 
 namespace Website.Controllers;
 
-public class UserController(AppDbContext dbContext, UserManager<ApplicationUser> userManager) : Controller
+public class UserController : Controller
 {
-    private readonly AppDbContext _dbContext = dbContext;
-    private readonly UserManager<ApplicationUser> _userManager = userManager;
+    private readonly AppDbContext _dbContext;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IRevenueService _revenueService;
+
+    public UserController(AppDbContext dbContext, UserManager<ApplicationUser> userManager, IRevenueService revenueService)
+    {
+        _dbContext = dbContext;
+        _userManager = userManager;
+        _revenueService = revenueService;
+    }
 
     public async Task<IActionResult> Profile(string username)
     {
@@ -130,5 +139,19 @@ public class UserController(AppDbContext dbContext, UserManager<ApplicationUser>
         }
 
         return View(user);
+    }
+
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> Wallet()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return RedirectToAction("Login", "Auth");
+
+        var totalRevenue = await _revenueService.GetAuthorTotalRevenueAsync(user.Id);
+        var transactions = await _revenueService.GetAuthorTransactionsAsync(user.Id);
+
+        ViewBag.TotalRevenue = totalRevenue;
+        return View(transactions);
     }
 }

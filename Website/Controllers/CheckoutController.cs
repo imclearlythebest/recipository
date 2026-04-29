@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Website.Data;
 using Website.Models;
+using Website.Services;
 
 namespace Website.Controllers;
 
@@ -12,11 +13,13 @@ public class CheckoutController : Controller
 {
   private readonly AppDbContext _context;
   private readonly UserManager<ApplicationUser> _userManager;
+  private readonly IRevenueService _revenueService;
 
-  public CheckoutController(AppDbContext context, UserManager<ApplicationUser> userManager)
+  public CheckoutController(AppDbContext context, UserManager<ApplicationUser> userManager, IRevenueService revenueService)
   {
     _context = context;
     _userManager = userManager;
+    _revenueService = revenueService;
   }
 
   public async Task<IActionResult> Index()
@@ -67,7 +70,8 @@ public class CheckoutController : Controller
       {
         ShopItemId = i.ShopItemId,
         Quantity = i.Quantity,
-        PriceAtPurchase = i.Product?.Price ?? 0
+        PriceAtPurchase = i.Product?.Price ?? 0,
+        RecipeId = i.OriginatingRecipeId
       }).ToList()
     };
 
@@ -75,6 +79,18 @@ public class CheckoutController : Controller
     
     // Clear the cart items from database
     _context.CartItems.RemoveRange(items);
+    
+    await _context.SaveChangesAsync();
+
+    // Record revenue for each item with an originating recipe
+    foreach (var orderItem in order.OrderItems)
+    {
+        if (orderItem.RecipeId.HasValue)
+        {
+            decimal itemTotal = (decimal)(orderItem.Quantity * orderItem.PriceAtPurchase);
+            await _revenueService.RecordRevenueAsync(orderItem.RecipeId.Value, orderItem.Id, itemTotal);
+        }
+    }
     
     await _context.SaveChangesAsync();
 

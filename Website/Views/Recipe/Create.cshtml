@@ -1,0 +1,129 @@
+@model List<Website.Models.Ingredient>
+
+@{
+    ViewData["Title"] = "Create Recipe";
+}
+
+<article>
+    <header>
+        <h1>Create New Recipe</h1>
+        <p>Share your culinary masterpiece with the world.</p>
+    </header>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger" style="color: var(--pico-form-element-invalid-border-color); margin-bottom: 1rem;">
+            <i class="fa-solid fa-circle-exclamation"></i> @TempData["Error"]
+        </div>
+    }
+
+    <form asp-action="Create" method="post">
+        <div class="grid">
+            <div>
+                <label for="Title">Recipe Title *</label>
+                <input type="text" id="Title" name="Title" placeholder="e.g., Authentic Italian Lasagna" required minlength="5" maxlength="200">
+                <small>A catchy title helps your recipe stand out.</small>
+            </div>
+        </div>
+
+        <label for="MainText">Short Description *</label>
+        <textarea id="MainText" name="MainText" placeholder="Briefly describe your recipe..." required minlength="10" maxlength="2000"></textarea>
+
+        <label for="Instructions">Cooking Instructions *</label>
+        <textarea id="Instructions" name="Instructions" rows="10" placeholder="Step 1: Prep the ingredients...&#10;Step 2: Cook the meat..." required minlength="20" maxlength="5000"></textarea>
+
+        <div class="grid">
+            <div>
+                <label for="Difficulty">Difficulty</label>
+                <select id="Difficulty" name="Difficulty">
+                    <option value="Easy">Easy</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="Hard">Hard</option>
+                </select>
+            </div>
+            <div>
+                <label for="ServingSize">Servings</label>
+                <input type="number" id="ServingSize" name="ServingSize" value="4" min="1" max="100">
+            </div>
+        </div>
+
+        <div class="grid">
+            <div>
+                <label for="PrepTime">Prep Time (mins)</label>
+                <input type="number" id="PrepTime" name="PrepTime" value="15" min="0" max="480">
+            </div>
+            <div>
+                <label for="CookTime">Cook Time (mins)</label>
+                <input type="number" id="CookTime" name="CookTime" value="30" min="0" max="480">
+            </div>
+        </div>
+
+        <fieldset>
+            <legend>Ingredients</legend>
+            <div id="ingredients-list">
+                <div class="ingredient-row grid" style="margin-bottom: 0.5rem;">
+                    <select name="Ingredients[0].IngredientId" required>
+                        <option value="" disabled selected>Select Ingredient</option>
+                        @foreach (var ing in Model)
+                        {
+                            <option value="@ing.Id">@ing.Name (@ing.Calories cal/100g)</option>
+                        }
+                    </select>
+                    <input type="number" name="Ingredients[0].Quantity" step="0.1" placeholder="Qty" required min="0.1" max="10000">
+                    <input type="text" name="Ingredients[0].Unit" placeholder="Unit (e.g., g, ml, cup)" required maxlength="50">
+                    <button type="button" class="outline secondary remove-ingredient" style="width: auto;"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </div>
+            <button type="button" id="add-ingredient" class="outline contrast" style="margin-top: 1rem;">
+                <i class="fa-solid fa-plus"></i> Add Ingredient
+            </button>
+        </fieldset>
+
+        <footer style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
+            <a asp-action="Index" asp-controller="Home" class="outline secondary" role="button">Cancel</a>
+            <button type="submit" class="primary">Save as Draft</button>
+        </footer>
+    </form>
+</article>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let ingredientIndex = 1;
+            const ingredientsList = document.getElementById('ingredients-list');
+            const addBtn = document.getElementById('add-ingredient');
+
+            addBtn.addEventListener('click', function() {
+                const firstRow = document.querySelector('.ingredient-row');
+                const newRow = firstRow.cloneNode(true);
+                
+                // Update names for the new index
+                newRow.querySelectorAll('select, input').forEach(input => {
+                    const name = input.getAttribute('name');
+                    input.setAttribute('name', name.replace('[0]', `[${ingredientIndex}]`));
+                    input.value = '';
+                });
+
+                ingredientsList.appendChild(newRow);
+                ingredientIndex++;
+                
+                // Add remove listener to new button
+                attachRemoveEvent(newRow.querySelector('.remove-ingredient'));
+            });
+
+            function attachRemoveEvent(btn) {
+                btn.addEventListener('click', function() {
+                    const rows = document.querySelectorAll('.ingredient-row');
+                    if (rows.length > 1) {
+                        btn.closest('.ingredient-row').remove();
+                    } else {
+                        alert('At least one ingredient is required.');
+                    }
+                });
+            }
+
+            // Initial remove listener
+            attachRemoveEvent(document.querySelector('.remove-ingredient'));
+        });
+    </script>
+}
