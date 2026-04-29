@@ -1,22 +1,41 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using Website.Data;
 using Website.Models;
 
 namespace Website.Controllers;
 
+[Authorize]
 public class CartController : Controller
 {
   private readonly AppDbContext _context;
-  private static List<CartItem> _cart = new List<CartItem>();
+  private readonly UserManager<ApplicationUser> _userManager;
 
-  public CartController(AppDbContext context) => _context = context;
+  public CartController(AppDbContext context, UserManager<ApplicationUser> userManager)
+  {
+    _context = context;
+    _userManager = userManager;
+  }
 
-  public IActionResult Index() => View(_cart);
+  public async Task<IActionResult> Index()
+  {
+    var userId = _userManager.GetUserId(User);
+    var cartItems = await _context.CartItems
+      .Include(c => c.Product)
+      .Where(c => c.ApplicationUserId == userId)
+      .ToListAsync();
+    return View(cartItems);
+  }
 
   [HttpPost]
   public async Task<IActionResult> AddToCart(int id)
   {
+    var userId = _userManager.GetUserId(User);
+    if (string.IsNullOrEmpty(userId)) return Challenge();
+
     var item = await _context.Ingredients.OfType<ShopItem>()
                    .FirstOrDefaultAsync(x => x.Id == id);
     
@@ -33,15 +52,22 @@ public class CartController : Controller
 
     // Update Database Stock
     item.Stock -= 1;
-    await _context.SaveChangesAsync();
 
-    // Update Static Cart
-    var existing = _cart.FirstOrDefault(x => x.ShopItemId == id);
+    // Update Cart in Database
+    var existing = await _context.CartItems
+      .FirstOrDefaultAsync(x => x.ShopItemId == id && x.ApplicationUserId == userId);
+
     if (existing != null) {
       existing.Quantity += 1;
     } else {
-      _cart.Add(new CartItem { ShopItemId = id, Product = item, Quantity = 1 });
+      _context.CartItems.Add(new CartItem { 
+        ShopItemId = id, 
+        ApplicationUserId = userId!, 
+        Quantity = 1 
+      });
     }
+
+    await _context.SaveChangesAsync();
 
     // OOB Response: Updates the toast AND the specific stock label on the marketplace
     return Content($@"
@@ -54,44 +80,75 @@ public class CartController : Controller
   [HttpPost]
   public async Task<IActionResult> UpdateQuantity(int id, int change)
   {
-    var cartItem = _cart.FirstOrDefault(x => x.ShopItemId == id);
+    var userId = _userManager.GetUserId(User);
+    var cartItem = await _context.CartItems
+      .FirstOrDefaultAsync(x => x.ShopItemId == id && x.ApplicationUserId == userId);
+    
+    if (cartItem == null) return RedirectToAction("Index");
+
     var dbItem = await _context.Ingredients.OfType<ShopItem>().FirstOrDefaultAsync(x => x.Id == id);
 
-    if (cartItem != null && dbItem != null)
+    if (change > 0)
     {
-      if (change > 0 && dbItem.Stock > 0)
+      if (dbItem != null && dbItem.Stock > 0)
       {
         dbItem.Stock -= 1;
         cartItem.Quantity += 1;
       }
-      else if (change < 0)
+      else if (dbItem != null)
+      {
+        ViewBag.Toast = $@"
+          <div id='cart-toast' hx-swap-oob='true' style='position:fixed; top:20px; right:20px; background:#e74c3c; color:white; padding:15px 25px; border-radius:8px; z-index:9999; box-shadow: 0 4px 12px rgba(0,0,0,0.1);'>
+            <strong>Stock Out!</strong> No more {dbItem.Name} available.
+          </div>";
+      }
+    }
+    else if (change < 0)
+    {
+      if (dbItem != null)
       {
         dbItem.Stock += 1;
-        cartItem.Quantity -= 1;
-        if (cartItem.Quantity <= 0) _cart.Remove(cartItem);
       }
-      await _context.SaveChangesAsync();
+      cartItem.Quantity -= 1;
+      if (cartItem.Quantity <= 0) 
+      {
+        _context.CartItems.Remove(cartItem);
+      }
     }
-    return View("Index", _cart);
+    
+    await _context.SaveChangesAsync();
+
+    var updatedCart = await _context.CartItems
+      .Include(c => c.Product)
+      .Where(c => c.ApplicationUserId == userId)
+      .ToListAsync();
+
+    return View("Index", updatedCart);
   }
 
   [HttpPost]
   public async Task<IActionResult> Remove(int id)
   {
-    var cartItem = _cart.FirstOrDefault(x => x.ShopItemId == id);
+    var userId = _userManager.GetUserId(User);
+    var cartItem = await _context.CartItems
+      .FirstOrDefaultAsync(x => x.ShopItemId == id && x.ApplicationUserId == userId);
+
     if (cartItem != null)
     {
       var dbItem = await _context.Ingredients.OfType<ShopItem>().FirstOrDefaultAsync(x => x.Id == id);
       if (dbItem != null)
       {
         dbItem.Stock += cartItem.Quantity;
-        await _context.SaveChangesAsync();
       }
-      _cart.Remove(cartItem);
+      _context.CartItems.Remove(cartItem);
+      await _context.SaveChangesAsync();
     }
-    return View("Index", _cart); 
-  }
 
-  public static List<CartItem> GetCartItems() => _cart;
-  public static void ClearCart() => _cart.Clear();
+    var updatedCart = await _context.CartItems
+      .Include(c => c.Product)
+      .Where(c => c.ApplicationUserId == userId)
+      .ToListAsync();
+
+    return View("Index", updatedCart); 
+  }
 }

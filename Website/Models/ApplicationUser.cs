@@ -14,4 +14,5 @@ public class ApplicationUser: IdentityUser
     public ICollection<RecipeReviewRequest> ReviewRequests { get; set; } = [];
     public ICollection<RecipeReview> Reviews { get; set; } = [];
     public ICollection<Collection> Collections  { get; set; } = [];
+    public ICollection<CartItem> CartItems { get; set; } = [];
 }
