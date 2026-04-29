@@ -6,5 +6,5 @@ public class Recipe: Content
     public ICollection<RecipeReview> Reviews { get; set; } = [];
     public ICollection<RecipeReviewRequest> ReviewRequests { get; set; } = [];
     public ICollection<Collection> Collections { get; set; } = [];
-    
+    public ICollection<Ingredient> Ingredients { get; set; } = [];
 }

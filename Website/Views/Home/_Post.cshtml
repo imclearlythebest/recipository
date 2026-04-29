@@ -43,6 +43,18 @@
                 <span class="fas fa-comment"></span>
             </button>
 
+            @if (currentUser != null)
+            {
+                <button type="button" 
+                        class="secondary outline" 
+                        title="Add ingredients to cart" 
+                        style="margin: 0; padding: 0.5rem 0.75rem;"
+                        hx-post="/Cart/AddRecipeIngredientsToCart?recipeId=@Model.Id" 
+                        hx-swap="none">
+                    <span class="fas fa-cart-plus"></span>
+                </button>
+            }
+
             @* Save to Collection (feed) *@
             @{
                 var userCollections = ViewData["UserCollections"] as List<Collection> ?? new List<Collection>();
@@ -101,4 +113,3 @@
         </div>
     </footer>
 </article>
-

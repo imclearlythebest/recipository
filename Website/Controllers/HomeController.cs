@@ -17,6 +17,7 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
         var currentUser = _userManager.GetUserAsync(User).GetAwaiter().GetResult();
         var query = _dbContext.Recipes
             .Include(r => r.Author)
+            .Include(r => r.Ingredients)
             .Include(r => r.Votes)
             .Include(r => r.Reviews)
             .ThenInclude(rv => rv.User)
@@ -181,6 +182,7 @@ public class HomeController(AppDbContext dbContext, UserManager<ApplicationUser>
 
         var recipe = await _dbContext.Recipes
             .Include(r => r.Author)
+            .Include(r => r.Ingredients)
             .Include(r => r.Votes)
             .Include(r => r.Reviews)
             .ThenInclude(rv => rv.User)
