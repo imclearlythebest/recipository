@@ -73,7 +73,7 @@
                             <button type="button" onclick="event.stopPropagation(); var el=document.getElementById('feed-collection-picker-@Model.Id'); el.style.display = el.style.display === 'block' ? 'none' : 'block';" title="Save" style="margin: 0; padding: 0.5rem 0.75rem; background: none; border: none; color: inherit; cursor: pointer;">
                                 <span class="fas fa-bookmark"></span>
                             </button>
-                            <div id="feed-collection-picker-@Model.Id" style="display:none; position:absolute; right:0; z-index:100; background:white; padding:0.5rem; border:1px solid #ddd; border-radius:0.25rem; min-width:200px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                            <div id="feed-collection-picker-@Model.Id" style="display:none; position:absolute; right:0; z-index:100; background: var(--pico-card-background-color); padding:0.5rem; border:1px solid var(--pico-muted-border-color); border-radius:0.25rem; min-width:200px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
                                 @if (!userCollections.Any())
                                 {
                                     <div>
