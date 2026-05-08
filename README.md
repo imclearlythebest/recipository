@@ -44,7 +44,7 @@ Recipository delivers a complete cooking and shopping experience in one place:
 
 ## 🧱 Architecture
 
-The application is built as a .NET web app with the following structure:
+The application is built as a .NET web app with the following structure (MVC):
 
 - `Website/` – main ASP.NET project.
 - `Website/Controllers/` – request handlers and API controllers.
@@ -52,34 +52,6 @@ The application is built as a .NET web app with the following structure:
 - `Website/Views/` – Razor pages and UI templates.
 - `Website/Services/` – business logic and service interfaces.
 - `Website/wwwroot/` – static assets like CSS, JS, and images.
-
-## 💡 Screenshots
-
-> Add screenshots below once available. Use relative paths inside `Website/wwwroot/images` or direct image links.
-
-### Homepage / Feed
-
-![Homepage Screenshot](Website/wwwroot/images/screenshot-homepage.png)
-
-### Recipe Detail and Ingredient Marketplace
-
-![Recipe Detail Screenshot](Website/wwwroot/images/screenshot-recipe.png)
-
-### Cart and Checkout
-
-![Checkout Screenshot](Website/wwwroot/images/screenshot-checkout.png)
-
-## 🛠️ Running the Project
-
-From the repository root:
-
-```powershell
-cd c:\Users\Bangla\Repositories\recipository
-dotnet build Website\Website.csproj
-dotnet run --project Website\Website.csproj
-```
-
-Open the browser at the URL shown in the console, typically `https://localhost:5001`.
 
 ## 🔧 Development Notes
 
